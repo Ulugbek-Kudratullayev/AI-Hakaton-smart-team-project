@@ -1,0 +1,9 @@
+.venv/
+.venv312/
+.pytest_cache/
+Lib/
+backend/.pytest_cache/
+frontend/.next/
+frontend/node_modules/
+frontend_nested_git_backup/
+frontend_clean_export/

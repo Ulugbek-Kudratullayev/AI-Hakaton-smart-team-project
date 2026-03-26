@@ -1,0 +1,9 @@
+__pycache__/
+.pytest_cache/
+.venv/
+*.pyc
+*.pyo
+*.db
+.env
+server*.log
+scripts/pip3*.exe
