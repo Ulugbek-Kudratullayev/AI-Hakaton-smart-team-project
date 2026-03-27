@@ -5,9 +5,12 @@ import {
   Plus, Pencil, Trash2, Truck, Route, MapPinned,
   Search, Save, Loader2,
 } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { getVehicleTypeLabel } from '@/data/mockData';
 import { api, ApiVehicle, ApiRoute, ApiZone } from '@/lib/api';
 import { loadVehicles } from '@/lib/loaders';
+
+const MapPicker = dynamic(() => import('@/components/ui/MapPicker'), { ssr: false });
 import type { Vehicle } from '@/types';
 import Modal from '@/components/ui/Modal';
 import StatusBadge from '@/components/ui/StatusBadge';
@@ -679,23 +682,17 @@ function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving,
   const [vehicleId, setVehicleId] = useState(route?.vehicleId ?? 0);
   const [routeName, setRouteName] = useState(route?.routeName ?? '');
   const [color, setColor] = useState(route?.color ?? '#ef4444');
-  const [waypointsText, setWaypointsText] = useState(
-    route?.waypoints.map(w => `${w[0]}, ${w[1]}`).join('\n') ?? ''
-  );
+  const [waypoints, setWaypoints] = useState<[number, number][]>(route?.waypoints ?? []);
 
   useEffect(() => {
     setVehicleId(route?.vehicleId ?? 0);
     setRouteName(route?.routeName ?? '');
     setColor(route?.color ?? '#ef4444');
-    setWaypointsText(route?.waypoints.map(w => `${w[0]}, ${w[1]}`).join('\n') ?? '');
+    setWaypoints(route?.waypoints ?? []);
   }, [route, isOpen]);
 
   const handleSave = () => {
     const selectedApiV = apiVehicles.find(v => v.id === vehicleId);
-    const waypoints: [number, number][] = waypointsText.split('\n').map(l => l.trim()).filter(Boolean)
-      .map(l => { const p = l.split(',').map(s => parseFloat(s.trim())); return [p[0], p[1]] as [number, number]; })
-      .filter(p => !isNaN(p[0]) && !isNaN(p[1]));
-
     onSave({
       apiId: route?.apiId ?? null,
       vehicleId, vehicleCode: selectedApiV?.internal_code ?? `V-${vehicleId}`,
@@ -703,7 +700,6 @@ function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving,
     });
   };
 
-  // Build vehicle select options from API vehicles
   const vehicleOptions = apiVehicles.length > 0
     ? apiVehicles.map(v => ({ id: v.id, label: `${v.internal_code} — ${v.brand_model}` }))
     : vehicles.map(v => ({ id: parseInt(v.id.replace('v-', ''), 10), label: `${v.internal_code} — ${getVehicleTypeLabel(v.type)}` }));
@@ -726,16 +722,14 @@ function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving,
           </Field>
         </div>
         <ColorPicker color={color} onChange={setColor} />
-        <Field label="Marshrut nuqtalari (har bir qator: lat, lng)">
-          <textarea value={waypointsText} onChange={e => setWaypointsText(e.target.value)}
-            placeholder={'40.384, 71.789\n40.386, 71.792\n40.388, 71.795'}
-            rows={8} className="input-field text-sm font-mono" style={{ resize: 'vertical' }} />
-          <p className="text-[11px] text-slate-400 mt-1">Har bir qatorga bitta koordinata yozing: kenglik, uzunlik</p>
+        <Field label="Xaritaga bosib marshrut yo'nalishini belgilang">
+          <MapPicker points={waypoints} onChange={setWaypoints} color={color} mode="polyline" height={380} />
         </Field>
       </div>
       <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
         <button onClick={onClose} className="btn btn-secondary btn-sm">Bekor qilish</button>
-        <button onClick={handleSave} className="btn btn-primary btn-sm" disabled={!vehicleId || saving}>
+        <button onClick={() => setWaypoints([])} className="btn btn-secondary btn-sm text-rose-500">Tozalash</button>
+        <button onClick={handleSave} className="btn btn-primary btn-sm" disabled={!vehicleId || waypoints.length < 2 || saving}>
           {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           {isEdit ? 'Saqlash' : 'Qo\'shish'}
         </button>
@@ -754,23 +748,17 @@ function ZoneFormModal({ isOpen, onClose, zone, apiVehicles, vehicles, saving, o
   const [vehicleId, setVehicleId] = useState(zone?.vehicleId ?? 0);
   const [zoneName, setZoneName] = useState(zone?.zoneName ?? '');
   const [color, setColor] = useState(zone?.color ?? '#10b981');
-  const [polygonText, setPolygonText] = useState(
-    zone?.polygon.map(p => `${p[0]}, ${p[1]}`).join('\n') ?? ''
-  );
+  const [polygon, setPolygon] = useState<[number, number][]>(zone?.polygon ?? []);
 
   useEffect(() => {
     setVehicleId(zone?.vehicleId ?? 0);
     setZoneName(zone?.zoneName ?? '');
     setColor(zone?.color ?? '#10b981');
-    setPolygonText(zone?.polygon.map(p => `${p[0]}, ${p[1]}`).join('\n') ?? '');
+    setPolygon(zone?.polygon ?? []);
   }, [zone, isOpen]);
 
   const handleSave = () => {
     const selectedApiV = apiVehicles.find(v => v.id === vehicleId);
-    const polygon: [number, number][] = polygonText.split('\n').map(l => l.trim()).filter(Boolean)
-      .map(l => { const p = l.split(',').map(s => parseFloat(s.trim())); return [p[0], p[1]] as [number, number]; })
-      .filter(p => !isNaN(p[0]) && !isNaN(p[1]));
-
     onSave({
       apiId: zone?.apiId ?? null,
       vehicleId, vehicleCode: selectedApiV?.internal_code ?? `V-${vehicleId}`,
@@ -800,18 +788,14 @@ function ZoneFormModal({ isOpen, onClose, zone, apiVehicles, vehicles, saving, o
           </Field>
         </div>
         <ColorPicker color={color} onChange={setColor} />
-        <Field label="Hudud chegarasi nuqtalari (har bir qator: lat, lng)">
-          <textarea value={polygonText} onChange={e => setPolygonText(e.target.value)}
-            placeholder={'40.388, 71.776\n40.388, 71.800\n40.382, 71.800\n40.382, 71.776'}
-            rows={8} className="input-field text-sm font-mono" style={{ resize: 'vertical' }} />
-          <p className="text-[11px] text-slate-400 mt-1">
-            Poligon nuqtalarini soat yo&apos;nalishida kiriting. Oxirgi nuqta birinchisiga avtomatik ulanadi.
-          </p>
+        <Field label="Xaritaga bosib hudud chegarasini belgilang">
+          <MapPicker points={polygon} onChange={setPolygon} color={color} mode="polygon" height={380} />
         </Field>
       </div>
       <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
         <button onClick={onClose} className="btn btn-secondary btn-sm">Bekor qilish</button>
-        <button onClick={handleSave} className="btn btn-primary btn-sm" disabled={!vehicleId || saving}>
+        <button onClick={() => setPolygon([])} className="btn btn-secondary btn-sm text-rose-500">Tozalash</button>
+        <button onClick={handleSave} className="btn btn-primary btn-sm" disabled={!vehicleId || polygon.length < 3 || saving}>
           {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
           {isEdit ? 'Saqlash' : 'Qo\'shish'}
         </button>
