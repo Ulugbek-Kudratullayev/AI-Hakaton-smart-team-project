@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from app.api.routes import alerts, analytics, auth, drivers, logs, maintenance, predictions, recommendations, simulation, tasks, vehicles
+from app.api.routes import alerts, analytics, auth, drivers, logs, maintenance, predictions, recommendations, routes, simulation, tasks, vehicles
 
 
 api_router = APIRouter()
@@ -15,3 +15,4 @@ api_router.include_router(recommendations.router, prefix="/recommendations", tag
 api_router.include_router(alerts.router, prefix="/alerts", tags=["Alerts"])
 api_router.include_router(simulation.router, prefix="/simulation", tags=["Simulation"])
 api_router.include_router(predictions.router, prefix="/predictions", tags=["Predictions"])
+api_router.include_router(routes.router, prefix="/manage", tags=["Routes & Zones"])

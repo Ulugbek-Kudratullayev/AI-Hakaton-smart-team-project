@@ -48,6 +48,13 @@ class FleetService:
         return vehicle
 
     @staticmethod
+    def delete_vehicle(db: Session, vehicle_id: int) -> dict[str, bool]:
+        vehicle = FleetService.get_vehicle(db, vehicle_id)
+        db.delete(vehicle)
+        db.commit()
+        return {"ok": True}
+
+    @staticmethod
     def list_drivers(db: Session) -> list[Driver]:
         return list(db.scalars(select(Driver).order_by(Driver.full_name)).all())
 

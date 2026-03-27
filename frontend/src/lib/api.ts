@@ -213,6 +213,26 @@ export interface ApiUserResponse {
   updated_at: string;
 }
 
+export interface ApiRoute {
+  id: number;
+  vehicle_id: number;
+  route_name: string;
+  color: string;
+  waypoints: number[][];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ApiZone {
+  id: number;
+  vehicle_id: number;
+  zone_name: string;
+  color: string;
+  polygon: number[][];
+  created_at: string;
+  updated_at: string;
+}
+
 // ─── API Methods ────────────────────────────────────────────────────────────
 
 // Auth
@@ -338,6 +358,53 @@ export const api = {
 
   async getActivityLog() {
     return apiFetch<ActivityLogEntry[]>('/simulation/activity-log', { skipAuth: true });
+  },
+
+  // Vehicle CRUD
+  async createVehicle(data: Partial<ApiVehicle>) {
+    return apiFetch<ApiVehicle>('/vehicles', { method: 'POST', body: data });
+  },
+
+  async updateVehicle(id: number, data: Partial<ApiVehicle>) {
+    return apiFetch<ApiVehicle>(`/vehicles/${id}`, { method: 'PATCH', body: data });
+  },
+
+  async deleteVehicle(id: number) {
+    return apiFetch<{ ok: boolean }>(`/vehicles/${id}`, { method: 'DELETE' });
+  },
+
+  // Routes
+  async getRoutes() {
+    return safeFetch<ApiRoute[]>('/manage/routes', () => []);
+  },
+
+  async createRoute(data: { vehicle_id: number; route_name: string; color: string; waypoints: number[][] }) {
+    return apiFetch<ApiRoute>('/manage/routes', { method: 'POST', body: data });
+  },
+
+  async updateRoute(id: number, data: { route_name?: string; color?: string; waypoints?: number[][] }) {
+    return apiFetch<ApiRoute>(`/manage/routes/${id}`, { method: 'PATCH', body: data });
+  },
+
+  async deleteRoute(id: number) {
+    return apiFetch<{ ok: boolean }>(`/manage/routes/${id}`, { method: 'DELETE' });
+  },
+
+  // Zones
+  async getZones() {
+    return safeFetch<ApiZone[]>('/manage/zones', () => []);
+  },
+
+  async createZone(data: { vehicle_id: number; zone_name: string; color: string; polygon: number[][] }) {
+    return apiFetch<ApiZone>('/manage/zones', { method: 'POST', body: data });
+  },
+
+  async updateZone(id: number, data: { zone_name?: string; color?: string; polygon?: number[][] }) {
+    return apiFetch<ApiZone>(`/manage/zones/${id}`, { method: 'PATCH', body: data });
+  },
+
+  async deleteZone(id: number) {
+    return apiFetch<{ ok: boolean }>(`/manage/zones/${id}`, { method: 'DELETE' });
   },
 
   // AI Predictions

@@ -8,6 +8,7 @@ from app.core.config import get_settings
 from app.db.base import Base
 from app.db.session import SessionLocal, engine
 from app.models.vehicle import Vehicle
+from app.models.route import VehicleRoute, ServiceZone  # noqa: F401 — register models
 from app.services.seed_service import seed_demo_data
 from app.services.simulation_service import SimulationEngine
 

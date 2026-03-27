@@ -29,3 +29,8 @@ def get_vehicle(vehicle_id: int, db: Session = Depends(get_db), _: object = Depe
 @router.patch("/{vehicle_id}", response_model=VehicleResponse)
 def update_vehicle(vehicle_id: int, payload: VehicleUpdate, db: Session = Depends(get_db), _: object = Depends(require_roles(UserRole.ADMIN, UserRole.DISPATCHER, UserRole.MECHANIC))) -> VehicleResponse:
     return FleetService.update_vehicle(db, vehicle_id, payload)
+
+
+@router.delete("/{vehicle_id}")
+def delete_vehicle(vehicle_id: int, db: Session = Depends(get_db), _: object = Depends(require_roles(UserRole.ADMIN))) -> dict:
+    return FleetService.delete_vehicle(db, vehicle_id)
