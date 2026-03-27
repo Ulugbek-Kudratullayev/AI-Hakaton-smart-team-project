@@ -1,0 +1,81 @@
+
+
+
+9
+
+Agent
+
+
+
+
+
+
+carefree-insight
+Deployments
+Variables
+Metrics
+Settings
+Unexposed service
+us-west2
+1 Replica
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+History
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+carefree-insight
+/
+cc66ee7b
+Failed
+
+Mar 27, 2026, 2:40 PM GMT+5
+Get Help
+Details
+Build Logs
+Deploy Logs
+Network Flow Logs
+Filter and search logs
+
+You reached the start of the range
+Mar 27, 2026, 2:40 PM
+Starting Container
+Usage: uvicorn [OPTIONS] APP
+Try 'uvicorn --help' for help.
+Error: Invalid value for '--port': '${PORT:-8000}' is not a valid integer.
+Try 'uvicorn --help' for help.
+Error: Invalid value for '--port': '${PORT:-8000}' is not a valid integer.
+Usage: uvicorn [OPTIONS] APP
+Error: Invalid value for '--port': '${PORT:-8000}' is not a valid integer.
+Usage: uvicorn [OPTIONS] APP
+Try 'uvicorn --help' for help.
+Usage: uvicorn [OPTIONS] APP
+Try 'uvicorn --help' for help.
+Error: Invalid value for '--port': '${PORT:-8000}' is not a valid integer.
