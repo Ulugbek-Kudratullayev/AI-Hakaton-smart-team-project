@@ -9,5 +9,7 @@ passlib==1.7.4
 psycopg2-binary==2.9.10
 python-multipart==0.0.20
 scikit-learn==1.7.1
+joblib==1.5.3
+numpy==2.4.3
 pytest==8.4.1
 httpx==0.28.1

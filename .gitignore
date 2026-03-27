@@ -17,6 +17,10 @@ backend/cache/
 # Backend
 backend/.pytest_cache/
 backend/*.log
+backend/app/ml/models/*.joblib
+
+# Claude memory
+.claude/
 
 # Frontend
 frontend/.next/
