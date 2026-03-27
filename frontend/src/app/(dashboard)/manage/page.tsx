@@ -408,6 +408,8 @@ export default function ManagePage() {
         route={editRoute}
         apiVehicles={apiVehicles}
         vehicles={vehicleList}
+        existingRoutes={routeList}
+        existingZones={zoneList}
         saving={saving}
         onSave={handleSaveRoute} />
 
@@ -417,6 +419,8 @@ export default function ManagePage() {
         zone={editZone}
         apiVehicles={apiVehicles}
         vehicles={vehicleList}
+        existingRoutes={routeList}
+        existingZones={zoneList}
         saving={saving}
         onSave={handleSaveZone} />
     </div>
@@ -673,9 +677,10 @@ function VehicleFormModal({ isOpen, onClose, vehicle, saving, onSave }: {
 }
 
 /* ─── Route Form Modal ─── */
-function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving, onSave }: {
+function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, existingRoutes, existingZones, saving, onSave }: {
   isOpen: boolean; onClose: () => void;
   route: ManagedRoute | null; apiVehicles: ApiVehicle[]; vehicles: Vehicle[];
+  existingRoutes: ManagedRoute[]; existingZones: ManagedZone[];
   saving: boolean; onSave: (r: ManagedRoute) => void;
 }) {
   const isEdit = !!route;
@@ -690,6 +695,25 @@ function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving,
     setColor(route?.color ?? '#ef4444');
     setWaypoints(route?.waypoints ?? []);
   }, [route, isOpen]);
+
+  // Find selected vehicle location
+  const selectedVehicle = vehicles.find(v => {
+    const numId = parseInt(v.id.replace('v-', ''), 10);
+    return numId === vehicleId;
+  });
+  const vehicleMarkerData = selectedVehicle ? {
+    lat: selectedVehicle.current_location.lat,
+    lng: selectedVehicle.current_location.lng,
+    label: selectedVehicle.internal_code,
+    emoji: vehicleEmoji(selectedVehicle.type),
+  } : undefined;
+
+  // Background context: other routes/zones (not the one being edited)
+  const bgRoutes = existingRoutes
+    .filter(r => r.apiId !== route?.apiId)
+    .map(r => ({ routeName: r.routeName, color: r.color, waypoints: r.waypoints }));
+  const bgZones = existingZones
+    .map(z => ({ zoneName: z.zoneName, color: z.color, polygon: z.polygon }));
 
   const handleSave = () => {
     const selectedApiV = apiVehicles.find(v => v.id === vehicleId);
@@ -723,7 +747,8 @@ function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving,
         </div>
         <ColorPicker color={color} onChange={setColor} />
         <Field label="Xaritaga bosib marshrut yo'nalishini belgilang">
-          <MapPicker points={waypoints} onChange={setWaypoints} color={color} mode="polyline" height={380} />
+          <MapPicker points={waypoints} onChange={setWaypoints} color={color} mode="polyline" height={380}
+            vehicleMarker={vehicleMarkerData} existingRoutes={bgRoutes} existingZones={bgZones} />
         </Field>
       </div>
       <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
@@ -739,9 +764,10 @@ function RouteFormModal({ isOpen, onClose, route, apiVehicles, vehicles, saving,
 }
 
 /* ─── Zone Form Modal ─── */
-function ZoneFormModal({ isOpen, onClose, zone, apiVehicles, vehicles, saving, onSave }: {
+function ZoneFormModal({ isOpen, onClose, zone, apiVehicles, vehicles, existingRoutes, existingZones, saving, onSave }: {
   isOpen: boolean; onClose: () => void;
   zone: ManagedZone | null; apiVehicles: ApiVehicle[]; vehicles: Vehicle[];
+  existingRoutes: ManagedRoute[]; existingZones: ManagedZone[];
   saving: boolean; onSave: (z: ManagedZone) => void;
 }) {
   const isEdit = !!zone;
@@ -756,6 +782,23 @@ function ZoneFormModal({ isOpen, onClose, zone, apiVehicles, vehicles, saving, o
     setColor(zone?.color ?? '#10b981');
     setPolygon(zone?.polygon ?? []);
   }, [zone, isOpen]);
+
+  const selectedVehicle = vehicles.find(v => {
+    const numId = parseInt(v.id.replace('v-', ''), 10);
+    return numId === vehicleId;
+  });
+  const vehicleMarkerData = selectedVehicle ? {
+    lat: selectedVehicle.current_location.lat,
+    lng: selectedVehicle.current_location.lng,
+    label: selectedVehicle.internal_code,
+    emoji: vehicleEmoji(selectedVehicle.type),
+  } : undefined;
+
+  const bgRoutes = existingRoutes
+    .map(r => ({ routeName: r.routeName, color: r.color, waypoints: r.waypoints }));
+  const bgZones = existingZones
+    .filter(z => z.apiId !== zone?.apiId)
+    .map(z => ({ zoneName: z.zoneName, color: z.color, polygon: z.polygon }));
 
   const handleSave = () => {
     const selectedApiV = apiVehicles.find(v => v.id === vehicleId);
@@ -789,7 +832,8 @@ function ZoneFormModal({ isOpen, onClose, zone, apiVehicles, vehicles, saving, o
         </div>
         <ColorPicker color={color} onChange={setColor} />
         <Field label="Xaritaga bosib hudud chegarasini belgilang">
-          <MapPicker points={polygon} onChange={setPolygon} color={color} mode="polygon" height={380} />
+          <MapPicker points={polygon} onChange={setPolygon} color={color} mode="polygon" height={380}
+            vehicleMarker={vehicleMarkerData} existingRoutes={bgRoutes} existingZones={bgZones} />
         </Field>
       </div>
       <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-100">
@@ -812,6 +856,14 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       {children}
     </div>
   );
+}
+
+function vehicleEmoji(type: string): string {
+  const map: Record<string, string> = {
+    traktor: '\u{1F69C}', yuk_mashinasi: '\u{1F69B}', xizmat_avtomobili: '\u{1F697}',
+    avtobus: '\u{1F68C}', ekskovator: '\u26CF\uFE0F', "sug'orish_mashinasi": '\u{1F4A7}',
+  };
+  return map[type] || '\u{1F698}';
 }
 
 function ColorPicker({ color, onChange }: { color: string; onChange: (c: string) => void }) {

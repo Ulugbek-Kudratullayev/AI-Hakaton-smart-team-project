@@ -53,18 +53,26 @@ async function apiFetch<T>(endpoint: string, options: FetchOptions = {}): Promis
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...rest,
-    headers,
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 4000);
 
-  if (!response.ok) {
-    const errBody = await response.json().catch(() => ({}));
-    throw new ApiError(response.status, errBody.detail || response.statusText);
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`, {
+      ...rest,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: controller.signal,
+    });
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => ({}));
+      throw new ApiError(response.status, errBody.detail || response.statusText);
+    }
+
+    return response.json();
+  } finally {
+    clearTimeout(timeoutId);
   }
-
-  return response.json();
 }
 
 export class ApiError extends Error {

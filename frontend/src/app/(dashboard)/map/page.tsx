@@ -7,7 +7,8 @@ import {
   getVehicleTypeLabel,
   getStatusLabel,
 } from '@/data/mockData';
-import { wasteRoutes, serviceZones } from '@/data/mapData';
+import { wasteRoutes as staticRoutes, serviceZones as staticZones } from '@/data/mapData';
+import type { VehicleRoute, ServiceZone } from '@/data/mapData';
 import { loadVehicles, loadTasks } from '@/lib/loaders';
 import { api } from '@/lib/api';
 import type { Vehicle, Task } from '@/types';
@@ -49,11 +50,40 @@ export default function MapPage() {
   const [isLive, setIsLive] = useState(false);
   const [simSpeed, setSimSpeed] = useState(1);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [dynamicRoutes, setDynamicRoutes] = useState<VehicleRoute[]>([]);
+  const [dynamicZones, setDynamicZones] = useState<ServiceZone[]>([]);
 
-  // Initial data load
+  // Initial data load + dynamic routes/zones from API
   useEffect(() => {
     loadVehicles().then(res => setVehicles(res.data));
     loadTasks().then(res => setTasks(res.data));
+
+    // Load API routes/zones and merge with static data
+    api.getRoutes().then(res => {
+      if (res.data.length > 0) {
+        const apiRoutes: VehicleRoute[] = res.data.map(r => ({
+          vehicleId: `v-${String(r.vehicle_id).padStart(3, '0')}`,
+          vehicleCode: `V-${r.vehicle_id}`,
+          routeName: r.route_name,
+          color: r.color,
+          waypoints: r.waypoints as [number, number][],
+        }));
+        setDynamicRoutes(apiRoutes);
+      }
+    }).catch(() => {});
+
+    api.getZones().then(res => {
+      if (res.data.length > 0) {
+        const apiZones: ServiceZone[] = res.data.map(z => ({
+          vehicleId: `v-${String(z.vehicle_id).padStart(3, '0')}`,
+          vehicleCode: `V-${z.vehicle_id}`,
+          zoneName: z.zone_name,
+          color: z.color,
+          polygon: z.polygon as [number, number][],
+        }));
+        setDynamicZones(apiZones);
+      }
+    }).catch(() => {});
   }, []);
 
   // Live position polling
@@ -261,8 +291,8 @@ export default function MapPage() {
           <FullMapView
             vehicles={filtered}
             tasks={showTasks ? tasks : []}
-            routes={showRoutes ? wasteRoutes : []}
-            zones={showZones ? serviceZones : []}
+            routes={showRoutes ? [...staticRoutes, ...dynamicRoutes] : []}
+            zones={showZones ? [...staticZones, ...dynamicZones] : []}
             selectedVehicleId={selectedVehicleId}
             onVehicleSelect={setSelectedVehicleId}
           />
