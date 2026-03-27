@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { getVehicleTypeLabel } from '@/data/mockData';
+import { wasteRoutes as staticRoutes, serviceZones as staticZones } from '@/data/mapData';
 import { api, ApiVehicle, ApiRoute, ApiZone } from '@/lib/api';
 import { loadVehicles } from '@/lib/loaders';
 
@@ -107,50 +108,115 @@ export default function ManagePage() {
   const [zoneModal, setZoneModal] = useState(false);
   const [editZone, setEditZone] = useState<ManagedZone | null>(null);
 
+  // Status map for live positions
+  const liveStatusMap: Record<string, string> = {
+    active: 'faol', idle: 'kutish', in_service: "ta'mirda", offline: 'kutish', unavailable: "ta'mirda",
+  };
+  const liveTypeMap: Record<string, string> = {
+    service_car: 'xizmat_avtomobili', tractor: 'traktor', utility_truck: 'yuk_mashinasi',
+    municipal_vehicle: 'avtobus', water_tanker: "sug'orish_mashinasi", loader: 'ekskovator',
+  };
+
   // Load data
   const reload = useCallback(async () => {
     setLoading(true);
     try {
-      // Vehicles
+      // Vehicles (backend + mock fallback)
       const vRes = await loadVehicles();
-      setVehicleList(vRes.data);
+      let allVehicles = [...vRes.data];
       setSource(vRes.source);
 
-      // Also load raw API vehicles for id mapping
+      // Raw API vehicles for id mapping
+      let rawApiVehicles: ApiVehicle[] = [];
       try {
         const rawV = await api.getVehicles(() => []);
+        rawApiVehicles = rawV.data;
         setApiVehicles(rawV.data);
       } catch { /* ignore */ }
 
-      // Routes
+      // Add mobile/GPS vehicles from live positions
       try {
-        const rRes = await api.getRoutes();
-        if (rRes.data.length > 0) {
-          setRouteList(rRes.data.map(r => ({
-            apiId: r.id,
-            vehicleId: r.vehicle_id,
-            vehicleCode: apiVehicles.find(v => v.id === r.vehicle_id)?.internal_code || `V-${r.vehicle_id}`,
-            routeName: r.route_name,
-            color: r.color,
-            waypoints: r.waypoints as [number, number][],
-          })));
+        const positions = await api.getLivePositions();
+        const existingCodes = new Set(allVehicles.map(v => v.internal_code));
+        for (const pos of positions) {
+          if (!existingCodes.has(pos.internal_code)) {
+            allVehicles.push({
+              id: `mob-${pos.vehicle_id}`,
+              internal_code: pos.internal_code,
+              plate_number: pos.internal_code,
+              type: (liveTypeMap[pos.vehicle_type] || 'xizmat_avtomobili') as Vehicle['type'],
+              department: 'GPS tracker',
+              status: (liveStatusMap[pos.status] || 'faol') as Vehicle['status'],
+              assigned_driver: 'Mobil haydovchi',
+              current_location: { lat: pos.lat, lng: pos.lng },
+              odometer: Math.round(pos.odometer),
+              efficiency_score: 0,
+              maintenance_risk: 0,
+              anomaly_count: 0,
+              fuel_level: Math.round(pos.fuel_level),
+              last_service: '',
+              next_service: '',
+              year: 2024,
+              model: 'GPS Tracker',
+            });
+            existingCodes.add(pos.internal_code);
+          }
         }
       } catch { /* ignore */ }
 
-      // Zones
+      setVehicleList(allVehicles);
+
+      // Routes: static + API
+      const staticManagedRoutes: ManagedRoute[] = staticRoutes.map(r => ({
+        apiId: null,
+        vehicleId: parseInt(r.vehicleId.replace('v-', ''), 10),
+        vehicleCode: r.vehicleCode,
+        routeName: r.routeName,
+        color: r.color,
+        waypoints: r.waypoints,
+      }));
+
+      let apiManagedRoutes: ManagedRoute[] = [];
+      try {
+        const rRes = await api.getRoutes();
+        if (rRes.data.length > 0) {
+          apiManagedRoutes = rRes.data.map(r => ({
+            apiId: r.id,
+            vehicleId: r.vehicle_id,
+            vehicleCode: rawApiVehicles.find(v => v.id === r.vehicle_id)?.internal_code || `V-${r.vehicle_id}`,
+            routeName: r.route_name,
+            color: r.color,
+            waypoints: r.waypoints as [number, number][],
+          }));
+        }
+      } catch { /* ignore */ }
+      setRouteList([...staticManagedRoutes, ...apiManagedRoutes]);
+
+      // Zones: static + API
+      const staticManagedZones: ManagedZone[] = staticZones.map(z => ({
+        apiId: null,
+        vehicleId: parseInt(z.vehicleId.replace('v-', ''), 10),
+        vehicleCode: z.vehicleCode,
+        zoneName: z.zoneName,
+        color: z.color,
+        polygon: z.polygon,
+      }));
+
+      let apiManagedZones: ManagedZone[] = [];
       try {
         const zRes = await api.getZones();
         if (zRes.data.length > 0) {
-          setZoneList(zRes.data.map(z => ({
+          apiManagedZones = zRes.data.map(z => ({
             apiId: z.id,
             vehicleId: z.vehicle_id,
-            vehicleCode: apiVehicles.find(v => v.id === z.vehicle_id)?.internal_code || `V-${z.vehicle_id}`,
+            vehicleCode: rawApiVehicles.find(v => v.id === z.vehicle_id)?.internal_code || `V-${z.vehicle_id}`,
             zoneName: z.zone_name,
             color: z.color,
             polygon: z.polygon as [number, number][],
-          })));
+          }));
         }
       } catch { /* ignore */ }
+      setZoneList([...staticManagedZones, ...apiManagedZones]);
     } finally {
       setLoading(false);
     }
@@ -490,29 +556,36 @@ function RoutesTab({ routes, search, onEdit, onDelete }: {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filtered.map(r => (
-        <div key={r.apiId ?? r.vehicleId} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${r.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Route size={20} style={{ color: r.color }} />
+      {filtered.map((r, idx) => {
+        const isStatic = r.apiId === null;
+        return (
+          <div key={r.apiId ?? `static-r-${idx}`} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: `${r.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Route size={20} style={{ color: r.color }} />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">{r.routeName}</div>
+                  <div className="text-xs text-slate-500">{r.vehicleCode}
+                    {isStatic && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 6, background: '#f1f5f9', color: '#94a3b8' }}>tizim</span>}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-semibold text-slate-800">{r.routeName}</div>
-                <div className="text-xs text-slate-500">{r.vehicleCode}</div>
-              </div>
+              {!isStatic && (
+                <div className="flex gap-1">
+                  <button onClick={() => onEdit(r)} className="btn btn-ghost btn-sm"><Pencil size={14} /></button>
+                  <button onClick={() => onDelete(r)} className="btn btn-ghost btn-sm text-rose-500"><Trash2 size={14} /></button>
+                </div>
+              )}
             </div>
-            <div className="flex gap-1">
-              <button onClick={() => onEdit(r)} className="btn btn-ghost btn-sm"><Pencil size={14} /></button>
-              <button onClick={() => onDelete(r)} className="btn btn-ghost btn-sm text-rose-500"><Trash2 size={14} /></button>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span style={{ width: 20, height: 3, background: r.color, borderRadius: 2, display: 'inline-block' }} />
+              <span>{r.waypoints.length} nuqta</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span style={{ width: 20, height: 3, background: r.color, borderRadius: 2, display: 'inline-block' }} />
-            <span>{r.waypoints.length} nuqta</span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
       {filtered.length === 0 && <div className="col-span-full py-12 text-center text-sm text-slate-400">Marshrut topilmadi</div>}
     </div>
   );
@@ -530,29 +603,36 @@ function ZonesTab({ zones, search, onEdit, onDelete }: {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {filtered.map(z => (
-        <div key={z.apiId ?? z.vehicleId} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex items-center gap-3">
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: `${z.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <MapPinned size={20} style={{ color: z.color }} />
+      {filtered.map((z, idx) => {
+        const isStatic = z.apiId === null;
+        return (
+          <div key={z.apiId ?? `static-z-${idx}`} className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex items-center gap-3">
+                <div style={{ width: 40, height: 40, borderRadius: 10, background: `${z.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MapPinned size={20} style={{ color: z.color }} />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">{z.zoneName}</div>
+                  <div className="text-xs text-slate-500">{z.vehicleCode}
+                    {isStatic && <span style={{ marginLeft: 6, fontSize: 9, padding: '1px 6px', borderRadius: 6, background: '#f1f5f9', color: '#94a3b8' }}>tizim</span>}
+                  </div>
+                </div>
               </div>
-              <div>
-                <div className="text-sm font-semibold text-slate-800">{z.zoneName}</div>
-                <div className="text-xs text-slate-500">{z.vehicleCode}</div>
-              </div>
+              {!isStatic && (
+                <div className="flex gap-1">
+                  <button onClick={() => onEdit(z)} className="btn btn-ghost btn-sm"><Pencil size={14} /></button>
+                  <button onClick={() => onDelete(z)} className="btn btn-ghost btn-sm text-rose-500"><Trash2 size={14} /></button>
+                </div>
+              )}
             </div>
-            <div className="flex gap-1">
-              <button onClick={() => onEdit(z)} className="btn btn-ghost btn-sm"><Pencil size={14} /></button>
-              <button onClick={() => onDelete(z)} className="btn btn-ghost btn-sm text-rose-500"><Trash2 size={14} /></button>
+            <div className="flex items-center gap-2 text-xs text-slate-500">
+              <span style={{ width: 14, height: 14, borderRadius: 3, background: `${z.color}22`, border: `2px solid ${z.color}`, display: 'inline-block' }} />
+              <span>{z.polygon.length} nuqta</span>
             </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-500">
-            <span style={{ width: 14, height: 14, borderRadius: 3, background: `${z.color}22`, border: `2px solid ${z.color}`, display: 'inline-block' }} />
-            <span>{z.polygon.length} nuqta</span>
-          </div>
-        </div>
-      ))}
+        );
+      })}
       {filtered.length === 0 && <div className="col-span-full py-12 text-center text-sm text-slate-400">Hudud topilmadi</div>}
     </div>
   );
