@@ -5,7 +5,7 @@
  * transforming from API shape → frontend shape when needed.
  */
 
-import { api, ApiVehicle, ApiTask, ApiAlert, ApiMaintenance, ApiDriver, ApiDashboardSummary } from '@/lib/api';
+import { api, getToken, ApiVehicle, ApiTask, ApiAlert, ApiMaintenance, ApiDriver, ApiDashboardSummary } from '@/lib/api';
 import {
   vehicles as mockVehicles,
   tasks as mockTasks,
@@ -15,6 +15,18 @@ import {
   activityLogs as mockLogs,
 } from '@/data/mockData';
 import type { Vehicle, Task, Alert, Maintenance, KPIData, ActivityLog } from '@/types';
+
+// ─── Auto-login for demo ────────────────────────────────────────────────────
+
+let _autoLoginPromise: Promise<void> | null = null;
+
+async function ensureAuth() {
+  if (getToken()) return;
+  if (!_autoLoginPromise) {
+    _autoLoginPromise = api.login('admin', 'Admin123!').then(() => {}).catch(() => {});
+  }
+  await _autoLoginPromise;
+}
 
 // ─── Enum label maps (backend → frontend Uzbek labels) ─────────────────────
 
@@ -137,6 +149,8 @@ function mapTask(t: ApiTask, vehicles?: ApiVehicle[]): Task {
     description: t.description,
     created_at: t.created_at,
     recommended_vehicles: [],
+    lat: t.lat || undefined,
+    lng: t.lng || undefined,
   };
 }
 
@@ -190,6 +204,7 @@ function mapDashboardToKpi(d: ApiDashboardSummary): KPIData {
 // ─── Data Loaders ───────────────────────────────────────────────────────────
 
 export async function loadVehicles(): Promise<{ data: Vehicle[]; source: 'api' | 'mock' }> {
+  await ensureAuth();
   const fallback = () => mockVehicles.map(v => ({
     id: 0, plate_number: v.plate_number, internal_code: v.internal_code,
     type: 'service_car', department: 'other', brand_model: v.model,
@@ -222,6 +237,7 @@ export async function loadVehicles(): Promise<{ data: Vehicle[]; source: 'api' |
 }
 
 export async function loadTasks(): Promise<{ data: Task[]; source: 'api' | 'mock' }> {
+  await ensureAuth();
   const result = await api.getTasks(() => []);
 
   if (result.source === 'mock' || result.data.length === 0) {
@@ -241,6 +257,7 @@ export async function loadTasks(): Promise<{ data: Task[]; source: 'api' | 'mock
 }
 
 export async function loadAlerts(): Promise<{ data: Alert[]; source: 'api' | 'mock' }> {
+  await ensureAuth();
   const result = await api.getAlerts(() => []);
 
   if (result.source === 'mock' || result.data.length === 0) {
@@ -260,6 +277,7 @@ export async function loadAlerts(): Promise<{ data: Alert[]; source: 'api' | 'mo
 }
 
 export async function loadMaintenance(): Promise<{ data: Maintenance[]; source: 'api' | 'mock' }> {
+  await ensureAuth();
   const result = await api.getMaintenance(() => []);
 
   if (result.source === 'mock' || result.data.length === 0) {
@@ -279,6 +297,7 @@ export async function loadMaintenance(): Promise<{ data: Maintenance[]; source: 
 }
 
 export async function loadDashboard(): Promise<{ kpi: KPIData; source: 'api' | 'mock'; apiSummary?: ApiDashboardSummary }> {
+  await ensureAuth();
   const result = await api.getDashboardSummary(() => ({
     total_vehicles: 0,
     active_vehicles: 0,

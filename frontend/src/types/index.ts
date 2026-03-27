@@ -42,6 +42,8 @@ export interface Task {
   recommended_vehicles: RecommendedVehicle[];
   description: string;
   created_at: string;
+  lat?: number;
+  lng?: number;
 }
 
 export interface RecommendedVehicle {

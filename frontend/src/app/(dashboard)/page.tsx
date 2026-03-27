@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
 import {
   Truck, Activity, PauseCircle, Wrench, Gauge, AlertTriangle,
   Plus, ArrowRightLeft, ClipboardPlus, Bell, ArrowRight,
@@ -14,36 +15,61 @@ import KPICard from '@/components/ui/KPICard';
 import ChartCard from '@/components/ui/ChartCard';
 import StatusBadge from '@/components/ui/StatusBadge';
 import {
-  kpiData as mockKpi, efficiencyTrend, taskCompletionTrend,
+  efficiencyTrend, taskCompletionTrend,
   maintenanceRiskDistribution, vehiclesByType, vehiclesByDepartment,
-  alerts as mockAlerts, activityLogs, vehicles as mockVehicles,
 } from '@/data/mockData';
-import { loadDashboard, loadVehicles, loadAlerts, loadActivityLogs } from '@/lib/loaders';
-import type { Vehicle, Alert, KPIData, ActivityLog } from '@/types';
+import { loadDashboard, loadVehicles, loadAlerts, loadTasks } from '@/lib/loaders';
+import { api } from '@/lib/api';
+import type { Vehicle, Task, Alert, KPIData, ActivityLog } from '@/types';
 import Link from 'next/link';
 
+const FleetMap = dynamic(() => import('@/components/ui/FleetMap'), { ssr: false });
+
+const emptyKpi: KPIData = { total_vehicles: 0, active_vehicles: 0, idle_vehicles: 0, in_service: 0, average_efficiency: 0, anomaly_alerts: 0 };
+
 export default function DashboardPage() {
-  const [kpiData, setKpiData] = useState<KPIData>(mockKpi);
-  const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
-  const [allAlerts, setAllAlerts] = useState<Alert[]>(mockAlerts);
-  const [logs, setLogs] = useState<ActivityLog[]>(activityLogs);
-  const [dataSource, setDataSource] = useState<'api' | 'mock'>('mock');
+  const [kpiData, setKpiData] = useState<KPIData>(emptyKpi);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [allAlerts, setAllAlerts] = useState<Alert[]>([]);
+  const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [isLive, setIsLive] = useState(false);
 
   useEffect(() => {
     async function load() {
-      const [dashRes, vRes, aRes, logRes] = await Promise.all([
+      const [dashRes, vRes, aRes, tRes] = await Promise.all([
         loadDashboard(),
         loadVehicles(),
         loadAlerts(),
-        loadActivityLogs(),
+        loadTasks(),
       ]);
       setKpiData(dashRes.kpi);
       setVehicles(vRes.data);
       setAllAlerts(aRes.data);
-      setLogs(logRes);
-      setDataSource(dashRes.source === 'api' || vRes.source === 'api' ? 'api' : 'mock');
+      setTasks(tRes.data);
+      setIsLive(dashRes.source === 'api' || vRes.source === 'api');
     }
     load();
+
+    // Poll activity log from simulation
+    async function pollLogs() {
+      try {
+        const entries = await api.getActivityLog();
+        setLogs(entries.map(e => ({ id: e.id, type: e.type as ActivityLog['type'], message: e.message, timestamp: e.timestamp, vehicle_code: e.vehicle_code || undefined })));
+      } catch {}
+    }
+    pollLogs();
+    const logInterval = setInterval(pollLogs, 10000);
+
+    // Poll KPI
+    const kpiInterval = setInterval(async () => {
+      try {
+        const res = await loadDashboard();
+        setKpiData(res.kpi);
+      } catch {}
+    }, 30000);
+
+    return () => { clearInterval(logInterval); clearInterval(kpiInterval); };
   }, []);
 
   const urgentAlerts = allAlerts.filter(a => a.status === 'yangi').slice(0, 4);
@@ -59,11 +85,11 @@ export default function DashboardPage() {
         </div>
         <span style={{
           fontSize: 11, fontWeight: 600, padding: '5px 12px', borderRadius: 8,
-          background: dataSource === 'api' ? '#ecfdf5' : '#fefce8',
-          color: dataSource === 'api' ? '#065f46' : '#854d0e',
-          border: `1px solid ${dataSource === 'api' ? '#a7f3d0' : '#fde68a'}`,
+          background: isLive ? '#ecfdf5' : '#fefce8',
+          color: isLive ? '#065f46' : '#854d0e',
+          border: `1px solid ${isLive ? '#a7f3d0' : '#fde68a'}`,
         }}>
-          {dataSource === 'api' ? '● API ulangan' : '● Demo rejim'}
+          {isLive ? '● LIVE — API ulangan' : '● Yuklanmoqda...'}
         </span>
       </div>
 
@@ -207,40 +233,7 @@ export default function DashboardPage() {
             </div>
             <span className="badge badge-info">{activeOnRoad} faol</span>
           </div>
-          <div style={{ position: 'relative', height: 280, background: 'linear-gradient(135deg, #eef2ff 0%, #f8fafc 50%, #ecfdf5 100%)' }}>
-            {vehicles.filter(v => v.status === "yo'lda" || v.status === 'faol').slice(0, 12).map((v) => {
-              const x = 10 + ((v.current_location.lng - 69.05) / 0.4) * 75;
-              const y = 10 + ((41.45 - v.current_location.lat) / 0.3) * 75;
-              const clampX = Math.min(88, Math.max(8, x));
-              const clampY = Math.min(88, Math.max(8, y));
-              const isActive = v.status === 'faol';
-              return (
-                <div key={v.id} style={{ position: 'absolute', left: `${clampX}%`, top: `${clampY}%` }}>
-                  <div style={{
-                    width: 12, height: 12, borderRadius: '50%',
-                    background: isActive ? '#10b981' : '#4f46e5',
-                    boxShadow: `0 0 0 4px ${isActive ? 'rgba(16,185,129,0.2)' : 'rgba(79,70,229,0.2)'}`,
-                    cursor: 'pointer', transition: 'transform 0.2s',
-                  }}
-                  title={`${v.internal_code} · ${v.assigned_driver}`}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.5)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
-                  />
-                </div>
-              );
-            })}
-            <div style={{ position: 'absolute', top: 16, left: 16, fontSize: 11, fontWeight: 500, color: '#94a3b8' }}>
-              Toshkent viloyati
-            </div>
-            <div style={{ position: 'absolute', bottom: 12, right: 16, display: 'flex', gap: 12, fontSize: 10, color: '#94a3b8' }}>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 8, height: 8, background: '#10b981', borderRadius: '50%', display: 'inline-block' }} /> Faol
-              </span>
-              <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span style={{ width: 8, height: 8, background: '#4f46e5', borderRadius: '50%', display: 'inline-block' }} /> Yo&apos;lda
-              </span>
-            </div>
-          </div>
+          <FleetMap vehicles={vehicles} tasks={tasks} height={320} />
         </div>
 
         {/* Activity Feed */}

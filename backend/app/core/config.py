@@ -12,7 +12,10 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = Field(default=720, alias="ACCESS_TOKEN_EXPIRE_MINUTES")
     database_url: str = Field(default="sqlite:///./fleet_demo_local.db", alias="DATABASE_URL")
     auto_create_tables: bool = Field(default=True, alias="AUTO_CREATE_TABLES")
-    seed_on_startup: bool = Field(default=False, alias="SEED_ON_STARTUP")
+    seed_on_startup: bool = Field(default=True, alias="SEED_ON_STARTUP")
+    simulation_enabled: bool = Field(default=True, alias="SIMULATION_ENABLED")
+    simulation_tick_interval: float = Field(default=2.0, alias="SIMULATION_TICK_INTERVAL")
+    simulation_day_minutes: int = Field(default=2, alias="SIMULATION_DAY_MINUTES")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

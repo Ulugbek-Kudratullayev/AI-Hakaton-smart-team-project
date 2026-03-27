@@ -1,17 +1,21 @@
+import json
+from pathlib import Path
+
 from app.models.enums import DepartmentType, FuelType, TaskType, VehicleType
 
 
+# All locations within Farg'ona shahri (Fergana city)
 UZBEKISTAN_LOCATIONS = [
-    {"region": "Tashkent", "district": "Yangihayot", "location_name": "Sergeli irrigation line", "lat": 41.2265, "lng": 69.1901},
-    {"region": "Tashkent", "district": "Bektemir", "location_name": "Bektemir service depot", "lat": 41.2091, "lng": 69.3358},
-    {"region": "Samarkand", "district": "Pastdargom", "location_name": "Pastdargom cotton cluster", "lat": 39.6729, "lng": 66.7560},
-    {"region": "Bukhara", "district": "Gijduvon", "location_name": "Gijduvon water pumping station", "lat": 40.1000, "lng": 64.6833},
-    {"region": "Fergana", "district": "Qo'qon", "location_name": "Qo'qon municipal equipment yard", "lat": 40.5286, "lng": 70.9425},
-    {"region": "Andijan", "district": "Asaka", "location_name": "Asaka road maintenance point", "lat": 40.6415, "lng": 72.2387},
-    {"region": "Namangan", "district": "Chortoq", "location_name": "Chortoq field service sector", "lat": 41.0692, "lng": 71.8237},
-    {"region": "Jizzakh", "district": "Zomin", "location_name": "Zomin district machinery yard", "lat": 39.9606, "lng": 68.3950},
-    {"region": "Surkhandarya", "district": "Termiz", "location_name": "Termiz logistics base", "lat": 37.2242, "lng": 67.2783},
-    {"region": "Khorezm", "district": "Urganch", "location_name": "Urganch utility response center", "lat": 41.5534, "lng": 60.6310},
+    {"region": "Farg'ona", "district": "Markaz", "location_name": "Farg'ona shahar markazi", "lat": 40.3842, "lng": 71.7891},
+    {"region": "Farg'ona", "district": "Shimoliy tuman", "location_name": "Shimoliy turar-joy massivi", "lat": 40.3960, "lng": 71.7850},
+    {"region": "Farg'ona", "district": "Janubiy tuman", "location_name": "Janubiy sanoat hududi", "lat": 40.3680, "lng": 71.7780},
+    {"region": "Farg'ona", "district": "Sharqiy tuman", "location_name": "Sharqiy turar-joy massivi", "lat": 40.3820, "lng": 71.8100},
+    {"region": "Farg'ona", "district": "G'arbiy tuman", "location_name": "G'arbiy bozor atrofi", "lat": 40.3840, "lng": 71.7600},
+    {"region": "Farg'ona", "district": "Markaz", "location_name": "Ahmad al-Farg'oniy bog'i", "lat": 40.3850, "lng": 71.7880},
+    {"region": "Farg'ona", "district": "Shimoliy-sharq", "location_name": "Tibbiyot instituti hududi", "lat": 40.3920, "lng": 71.8080},
+    {"region": "Farg'ona", "district": "Janubiy-g'arb", "location_name": "Xizmat ko'rsatish bazasi", "lat": 40.3700, "lng": 71.7620},
+    {"region": "Farg'ona", "district": "Markaz", "location_name": "Markaziy bozor", "lat": 40.3835, "lng": 71.7840},
+    {"region": "Farg'ona", "district": "Shimoliy", "location_name": "Shimoliy bog' massivi", "lat": 40.3980, "lng": 71.7900},
 ]
 
 DRIVER_NAMES = [
@@ -31,6 +35,41 @@ VEHICLE_TEMPLATES = [
     (VehicleType.LOADER, DepartmentType.SANITATION, FuelType.DIESEL, "XCMG Loader LW300", 190),
     (VehicleType.UTILITY_TRUCK, DepartmentType.MUNICIPAL, FuelType.DIESEL, "GAZ Next Utility", 90),
 ]
+
+# Simulation routes — loaded from OSM-extracted real road data
+_ROUTES_FILE = Path(__file__).parent / "fergana_routes.json"
+
+_TYPE_MAP = {
+    "utility_truck": VehicleType.UTILITY_TRUCK,
+    "municipal_vehicle": VehicleType.MUNICIPAL_VEHICLE,
+    "service_car": VehicleType.SERVICE_CAR,
+    "tractor": VehicleType.TRACTOR,
+    "water_tanker": VehicleType.WATER_TANKER,
+    "loader": VehicleType.LOADER,
+}
+
+
+def _load_routes():
+    if _ROUTES_FILE.exists():
+        with open(_ROUTES_FILE, encoding="utf-8") as f:
+            raw = json.load(f)
+        routes = []
+        for r in raw:
+            routes.append({
+                "name": r["name"],
+                "vehicle_types": [_TYPE_MAP.get(t, VehicleType.UTILITY_TRUCK) for t in r["vehicle_types"]],
+                "waypoints": [tuple(wp) for wp in r["waypoints"]],
+            })
+        return routes
+    # Fallback if JSON not found
+    return [
+        {"name": "Default", "vehicle_types": [VehicleType.UTILITY_TRUCK],
+         "waypoints": [(40.384, 71.789), (40.390, 71.795), (40.396, 71.800)]},
+    ]
+
+
+VEHICLE_ROUTES = _load_routes()
+
 
 TASK_TEMPLATES = {
     TaskType.FIELD_WORK: ["Canal-side soil prep", "Cotton field support", "Spring tillage support"],

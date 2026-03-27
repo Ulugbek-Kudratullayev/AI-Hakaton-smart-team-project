@@ -320,4 +320,103 @@ export const api = {
   async getTaskRecommendations(taskId: number) {
     return apiFetch<ApiRecommendation[]>(`/recommendations/tasks/${taskId}/vehicles`);
   },
+
+  // Simulation
+  async getLivePositions() {
+    return apiFetch<LivePosition[]>('/simulation/positions', { skipAuth: true });
+  },
+
+  async getSimulationStatus() {
+    return apiFetch<SimulationStatus>('/simulation/status', { skipAuth: true });
+  },
+
+  async controlSimulation(action: string) {
+    return apiFetch<{ status: string }>('/simulation/control', {
+      method: 'POST', body: { action }, skipAuth: true,
+    });
+  },
+
+  async getActivityLog() {
+    return apiFetch<ActivityLogEntry[]>('/simulation/activity-log', { skipAuth: true });
+  },
+
+  // AI Predictions
+  async getBreakdownForecast(vehicleId: number) {
+    return apiFetch<BreakdownForecast>(`/predictions/vehicles/${vehicleId}/breakdown-forecast`, { skipAuth: true });
+  },
+
+  async getFuelAnomalyProbability(vehicleId: number) {
+    return apiFetch<FuelAnomalyProbability>(`/predictions/vehicles/${vehicleId}/fuel-anomaly-probability`, { skipAuth: true });
+  },
+
+  async getFleetRiskRanking() {
+    return apiFetch<FleetRiskItem[]>('/predictions/fleet/risk-ranking', { skipAuth: true });
+  },
 };
+
+// ─── Simulation & Prediction Types ──────────────────────────────────────────
+
+export interface LivePosition {
+  vehicle_id: number;
+  internal_code: string;
+  vehicle_type: string;
+  lat: number;
+  lng: number;
+  speed_kmh: number;
+  heading: number;
+  status: string;
+  fuel_level: number;
+  odometer: number;
+}
+
+export interface SimulationStatus {
+  running: boolean;
+  speed_multiplier: number;
+  tick_count: number;
+  total_vehicles: number;
+  active_vehicles: number;
+  sim_time: string;
+}
+
+export interface ActivityLogEntry {
+  id: string;
+  type: string;
+  message: string;
+  timestamp: string;
+  vehicle_code: string | null;
+}
+
+export interface BreakdownForecast {
+  vehicle_id: number;
+  internal_code: string;
+  current_risk_score: number;
+  risk_level: string;
+  predicted_days_to_high_risk: number;
+  confidence: number;
+  risk_factors: string[];
+  model_type: string;
+  daily_risk_increase: number;
+}
+
+export interface FuelAnomalyProbability {
+  vehicle_id: number;
+  internal_code: string;
+  probability_7d: number;
+  trend: string;
+  explanation: string;
+  recent_daily_probabilities: number[];
+  model_type: string;
+}
+
+export interface FleetRiskItem {
+  vehicle_id: number;
+  internal_code: string;
+  plate_number: string;
+  vehicle_type: string;
+  status: string;
+  combined_risk: number;
+  maintenance_risk: number;
+  anomaly_probability: number;
+  anomaly_count_14d: number;
+  risk_level: string;
+}

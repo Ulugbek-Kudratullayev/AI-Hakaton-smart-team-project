@@ -1,9 +1,49 @@
+# Python
 .venv/
 .venv312/
+__pycache__/
+*.pyc
 .pytest_cache/
-Lib/
+/Lib/
+
+# Database
+*.db
+*.sqlite3
+
+# Large data files
+*.osm.pbf
+backend/cache/
+
+# Backend
 backend/.pytest_cache/
+backend/*.log
+
+# Frontend
 frontend/.next/
 frontend/node_modules/
+
+# Flutter
+flutter_app/build/
+flutter_app/.dart_tool/
+flutter_app/android/.gradle/
+flutter_driver/build/
+flutter_driver/.dart_tool/
+flutter_driver/android/.gradle/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Old backups
 frontend_nested_git_backup/
 frontend_clean_export/
+
+# OS
+.DS_Store
+Thumbs.db

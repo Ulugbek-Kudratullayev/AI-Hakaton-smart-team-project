@@ -4,11 +4,12 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard, Truck, ClipboardList, Wrench,
-  AlertTriangle, BarChart3, Settings, X, ChevronLeft, Shield,
+  AlertTriangle, BarChart3, Settings, X, ChevronLeft, Shield, Map,
 } from 'lucide-react';
 
 const navItems = [
   { href: '/', label: 'Boshqaruv paneli', icon: LayoutDashboard },
+  { href: '/map', label: 'Xarita', icon: Map },
   { href: '/vehicles', label: 'Avtotransport', icon: Truck },
   { href: '/tasks', label: 'Vazifalar', icon: ClipboardList },
   { href: '/maintenance', label: 'Texnik xizmat', icon: Wrench },

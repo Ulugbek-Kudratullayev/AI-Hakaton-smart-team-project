@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="uz">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hokimiyat Transport Nazorati AI — Pitch Deck</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+  <style>
+    /* ── Print ─────────────────────────────────────────── */
+    @page {
+      size: landscape;
+      margin: 0;
+    }
+
+    /* ── Reset ─────────────────────────────────────────── */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: #06060f;
+      color: #e2e8f0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact
+    }
+
+    /* ── Design Tokens ─────────────────────────────────── */
+    :root {
+      /* Surface opacity ladder */
+      --glass-1-bg: rgba(255, 255, 255, 0.03);
+      --glass-2-bg: rgba(255, 255, 255, 0.055);
+      --glass-3-bg: rgba(255, 255, 255, 0.08);
+      /* Blur scale */
+      --blur-1: 20px;
+      --blur-2: 32px;
+      --blur-3: 44px;
+      /* Edge highlights */
+      --edge-top: rgba(255, 255, 255, 0.09);
+      --edge-side: rgba(255, 255, 255, 0.04);
+      --edge-glow: rgba(99, 102, 241, 0.08);
+      /* Shadows */
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.25);
+      --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.35);
+      --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+    }
+
+    /* ── Slide Frame ──────────────────────────────────── */
+    .slide {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 56px 72px;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+
+    .slide:last-child {
+      page-break-after: avoid
+    }
+
+    /* Background mesh — gives glass something to sample */
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 15% 20%, rgba(99, 102, 241, 0.13) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 75%, rgba(6, 182, 212, 0.09) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 50% at 50% 50%, rgba(139, 92, 246, 0.06) 0%, transparent 60%),
+        linear-gradient(160deg, #08081a 0%, #0c0c24 40%, #070714 100%);
+    }
+
+    .content {
+      position: relative;
+      z-index: 1
+    }
+
+    /* ── Glass Surface System ─────────────────────────── */
+    /* Tier 1 — lightest, largest areas */
+    .g1 {
+      background: var(--glass-1-bg);
+      backdrop-filter: blur(var(--blur-1)) saturate(1.15);
+      -webkit-backdrop-filter: blur(var(--blur-1)) saturate(1.15);
+      border: 1px solid var(--edge-side);
+      border-top-color: var(--edge-top);
+      border-radius: 20px;
+      box-shadow: var(--shadow-md), inset 0 1px 0 var(--edge-top);
+    }
+
+    /* Tier 2 — medium emphasis */
+    .g2 {
+      background: var(--glass-2-bg);
+      backdrop-filter: blur(var(--blur-2)) saturate(1.2);
+      -webkit-backdrop-filter: blur(var(--blur-2)) saturate(1.2);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-top-color: var(--edge-top);
+      border-radius: 18px;
+      box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+
+    /* Tier 3 — strongest, small panels */
+    .g3 {
+      background: var(--glass-3-bg);
+      backdrop-filter: blur(var(--blur-3)) saturate(1.3);
+      -webkit-backdrop-filter: blur(var(--blur-3)) saturate(1.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-top-color: rgba(255, 255, 255, 0.16);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+    }
+
+    /* Accent tinted glass */
+    .g-accent {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.09), rgba(79, 70, 229, 0.04));
+      backdrop-filter: blur(var(--blur-1));
+      -webkit-backdrop-filter: blur(var(--blur-1));
+      border: 1px solid rgba(99, 102, 241, 0.18);
+      border-top-color: rgba(129, 140, 248, 0.22);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(79, 70, 229, 0.12), inset 0 1px 0 rgba(129, 140, 248, 0.1);
+    }
+
+    /* ── Ambient Orbs (backdrop source) ───────────────── */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      opacity: 0.35;
+      z-index: 0
+    }
+
+    /* ── Chrome ────────────────────────────────────────── */
+    .slide-num {
+      position: absolute;
+      bottom: 28px;
+      right: 48px;
+      font-size: 11px;
+      color: rgba(148, 163, 184, 0.35);
+      font-weight: 500;
+      letter-spacing: 0.12em
+    }
+
+    .topbar {
+      position: absolute;
+      top: 28px;
+      left: 48px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(148, 163, 184, 0.45);
+      letter-spacing: 0.06em
+    }
+
+    .topbar-mark {
+      width: 26px;
+      height: 26px;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #6366f1, #4338ca);
+      display: flex;
+      align-items: center;
+      justify-content: center
+    }
+
+    .topbar-mark svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    /* ── Typography ────────────────────────────────────── */
+    h1 {
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.03em
+    }
+
+    h2 {
+      font-size: 38px;
+      font-weight: 800;
+      line-height: 1.12;
+      letter-spacing: -0.025em
+    }
+
+    h3 {
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.3
+    }
+
+    .sub {
+      font-size: 19px;
+      font-weight: 400;
+      color: #94a3b8;
+      line-height: 1.6;
+      margin-top: 14px
+    }
+
+    .lbl {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: #818cf8;
+      margin-bottom: 8px
+    }
+
+    .hi {
+      color: #a5b4fc
+    }
+
+    .hi-c {
+      color: #22d3ee
+    }
+
+    .hi-e {
+      color: #34d399
+    }
+
+    .hi-a {
+      color: #fbbf24
+    }
+
+    .hi-r {
+      color: #fb7185
+    }
+
+    .big {
+      font-size: 46px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -0.02em
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(99, 102, 241, 0.12);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.18)
+    }
+
+    /* ── Layout helpers ────────────────────────────────── */
+    .g2c {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px
+    }
+
+    .g3c {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px
+    }
+
+    .g4c {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: 18px
+    }
+
+    .pad {
+      padding: 26px
+    }
+
+    .pad-s {
+      padding: 20px
+    }
+
+    .ico {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
+    }
+
+    .ico svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round
+    }
+
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .mrow {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04)
+    }
+
+    .mrow:last-child {
+      border-bottom: none
+    }
+
+    .bullet {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: #cbd5e1;
+      padding: 3px 0
+    }
+
+    .bullet::before {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0
+    }
+
+    /* Colored dot bullets */
+    .b-i::before {
+      background: #818cf8
+    }
+
+    .b-c::before {
+      background: #22d3ee
+    }
+
+    .b-e::before {
+      background: #34d399
+    }
+
+    .b-a::before {
+      background: #fbbf24
+    }
+
+    .b-v::before {
+      background: #a78bfa
+    }
+
+    .b-r::before {
+      background: #fb7185
+    }
+
+    .b-s::before {
+      background: #94a3b8
+    }
+
+    @media print {
+      .slide {
+        break-after: page
+      }
+
+      .slide:last-child {
+        break-after: avoid
+      }
+
+      .orb {
+        filter: none;
+        opacity: 0.15
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════ SLIDE 1 — TITLE ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:420px;height:420px;background:#4f46e5;top:-80px;right:-60px"></div>
+    <div class="orb" style="width:320px;height:320px;background:#06b6d4;bottom:-90px;left:-40px"></div>
+    <div class="orb" style="width:180px;height:180px;background:#8b5cf6;top:55%;right:35%;opacity:0.18"></div>
+
+    <div class="content" style="max-width:780px">
+      <div class="row" style="margin-bottom:36px">
+        <div
+          style="width:52px;height:52px;border-radius:14px;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(79,70,229,0.45)">
+          <svg width="26" height="26" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+          </svg>
+        </div>
+        <span class="tag">GovTech AI Platform</span>
+      </div>
+      <h1>Hokimiyat Transport<br><span class="hi">Nazorati AI</span></h1>
+      <p class="sub" style="max-width:580px">Hokimiyat transport parkini sun'iy intellekt yordamida real vaqtda
+        monitoring qilish, samaradorlikni oshirish va xarajatlarni kamaytirish platformasi.</p>
+      <div style="display:flex;gap:10px;margin-top:32px">
+        <span class="tag">O'zbekiston</span>
+        <span class="tag">AI-Powered</span>
+        <span class="tag">Real-time</span>
+      </div>
+    </div>
+    <span class="slide-num">01 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 2 — MUAMMO ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:340px;height:340px;background:#f43f5e;top:-70px;right:12%"></div>
+    <div class="orb" style="width:200px;height:200px;background:#f59e0b;bottom:12%;left:6%;opacity:0.2"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Muammo</p>
+      <h2 style="max-width:680px">Hokimiyat transporti <span class="hi-r">nazorat ostida emas</span></h2>
+      <p class="sub" style="max-width:580px;margin-bottom:32px">O'zbekistondagi 200+ hokimiyatda minglab transport
+        vositalari samarasiz boshqarilmoqda</p>
+
+      <div class="g3c">
+        <div class="g2 pad">
+          <div class="ico" style="background:linear-gradient(135deg,#f43f5e,#e11d48);margin-bottom:14px">
+            <svg>
+              <path d="M3 22V12l4-8h10l4 8v10" />
+              <path d="M3 14h18" />
+              <circle cx="7" cy="18" r="2" />
+              <circle cx="17" cy="18" r="2" />
+            </svg>
+          </div>
+          <h3 style="font-size:17px">Yoqilg'i isrofi</h3>
+          <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6">Yoqilg'i sarfi nazorat qilinmaydi, har
+            yili <span class="hi-r" style="font-weight:700">20–30%</span> ortiqcha xarajat</p>
+        </div>
+        <div class="g2 pad">
+          <div class="ico" style="background:linear-gradient(135deg,#f59e0b,#d97706);margin-bottom:14px">
+            <svg>
+              <path
+                d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94L6.73 20.2a2 2 0 01-2.83 0l-.1-.1a2 2 0 010-2.83l6.73-6.73A6 6 0 016.3 2.53l3.77 3.77z" />
+            </svg>
+          </div>
+          <h3 style="font-size:17px">Texnik nosozliklar</h3>
+          <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6">Profilaktik xizmat yo'q — transport
+            <span class="hi-r" style="font-weight:700">kutilmagan</span> holatda ishdan chiqadi</p>
+        </div>
+        <div class="g2 pad">
+          <div class="ico" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed);margin-bottom:14px">
+            <svg>
+              <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z" />
+              <circle cx="12" cy="10" r="3" />
+            </svg>
+          </div>
+          <h3 style="font-size:17px">Marshrut buzilishi</h3>
+          <p style="font-size:13px;color:#94a3b8;margin-top:8px;line-height:1.6">Haydovchilar shaxsiy maqsadlarda
+            foydalanadi — <span class="hi-r" style="font-weight:700">hech qanday</span> kuzatuv yo'q</p>
+        </div>
+      </div>
+
+      <div class="g-accent"
+        style="margin-top:24px;padding:18px 26px;max-width:680px;display:flex;align-items:center;gap:14px">
+        <div class="ico" style="background:rgba(251,113,133,0.15);width:40px;height:40px;border-radius:10px">
+          <svg style="stroke:#fb7185">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 100 7h5a3.5 3.5 0 110 7H6" />
+          </svg>
+        </div>
+        <div>
+          <p style="font-size:14px;font-weight:600;color:#e2e8f0">O'rtacha hokimiyat yiliga <span class="hi-r">500+ mln
+              so'm</span> transport xarajatini behuda sarflaydi</p>
+          <p style="font-size:11px;color:#64748b;margin-top:3px">Manba: Davlat moliya tahlili, 2025</p>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">02 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 3 — YECHIM ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:380px;height:380px;background:#4f46e5;top:-40px;left:-40px;opacity:0.25"></div>
+    <div class="orb" style="width:300px;height:300px;background:#10b981;bottom:-80px;right:-40px;opacity:0.2"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Yechim</p>
+      <h2 style="max-width:700px"><span class="hi">AI-quvvatli</span> transport monitoring platformasi</h2>
+      <p class="sub" style="max-width:580px;margin-bottom:28px">Bitta tizimda — monitoring, tahlil, anomaliya aniqlash
+        va aqlli tayinlash</p>
+
+      <div class="g4c">
+        <div class="g1 pad-s" style="text-align:center">
+          <div class="ico" style="background:linear-gradient(135deg,#6366f1,#4338ca);margin:0 auto 12px"><svg>
+              <path d="M18 20V10M12 20V4M6 20v-6" />
+            </svg></div>
+          <h3 style="font-size:15px">Real-time Dashboard</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-top:6px">KPI, grafik, xarita — bir qarashda</p>
+        </div>
+        <div class="g1 pad-s" style="text-align:center">
+          <div class="ico" style="background:linear-gradient(135deg,#f43f5e,#e11d48);margin:0 auto 12px"><svg>
+              <path
+                d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" />
+            </svg></div>
+          <h3 style="font-size:15px">AI Anomaliya</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-top:6px">Yoqilg'i, marshrut, kutish anomaliyalari</p>
+        </div>
+        <div class="g1 pad-s" style="text-align:center">
+          <div class="ico" style="background:linear-gradient(135deg,#f59e0b,#d97706);margin:0 auto 12px"><svg>
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 01-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
+            </svg></div>
+          <h3 style="font-size:15px">Profilaktik TX</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-top:6px">Xizmat xavfini oldindan bashorat qilish</p>
+        </div>
+        <div class="g1 pad-s" style="text-align:center">
+          <div class="ico" style="background:linear-gradient(135deg,#10b981,#059669);margin:0 auto 12px"><svg>
+              <circle cx="12" cy="12" r="10" />
+              <path d="M16 12l-4-4-4 4M12 16V8" />
+            </svg></div>
+          <h3 style="font-size:15px">Aqlli tayinlash</h3>
+          <p style="font-size:12px;color:#94a3b8;margin-top:6px">Vazifaga optimal transportni AI tavsiya qiladi</p>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">03 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 4 — ARXITEKTURA ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:300px;height:300px;background:#06b6d4;top:8%;right:-40px;opacity:0.22"></div>
+    <div class="orb" style="width:200px;height:200px;background:#4f46e5;bottom:15%;left:5%;opacity:0.15"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Arxitektura</p>
+      <h2>Texnologik <span class="hi-c">stek</span></h2>
+      <p class="sub" style="margin-bottom:28px">Zamonaviy, kengaytiriladigan va ishonchli tizim</p>
+
+      <div class="g3c">
+        <div class="g2 pad">
+          <p class="lbl" style="color:#22d3ee">Frontend</p>
+          <h3 style="font-size:17px;margin-bottom:12px">Next.js 16 + TypeScript</h3>
+          <div class="bullet b-c">Tailwind CSS dizayn tizimi</div>
+          <div class="bullet b-c">Recharts vizualizatsiya</div>
+          <div class="bullet b-c">API fallback → Mock data</div>
+          <div class="bullet b-c">9 ta sahifa + responsiv dizayn</div>
+        </div>
+        <div class="g2 pad">
+          <p class="lbl" style="color:#34d399">Backend</p>
+          <h3 style="font-size:17px;margin-bottom:12px">FastAPI + SQLAlchemy</h3>
+          <div class="bullet b-e">20+ REST API endpoint</div>
+          <div class="bullet b-e">JWT autentifikatsiya (4 rol)</div>
+          <div class="bullet b-e">Alembic migratsiya</div>
+          <div class="bullet b-e">Docker tayyor</div>
+        </div>
+        <div class="g2 pad">
+          <p class="lbl" style="color:#a78bfa">AI / ML</p>
+          <h3 style="font-size:17px;margin-bottom:12px">4 ta intellekt moduli</h3>
+          <div class="bullet b-v">Samaradorlik skoringi</div>
+          <div class="bullet b-v">Anomaliya detektori</div>
+          <div class="bullet b-v">TX xavf bashorati</div>
+          <div class="bullet b-v">Tavsiya mexanizmi</div>
+        </div>
+      </div>
+
+      <div class="g-accent"
+        style="padding:14px 24px;margin-top:22px;display:flex;align-items:center;justify-content:center;gap:36px;font-size:13px;font-weight:500">
+        <span style="color:#e2e8f0">Next.js</span>
+        <span style="color:rgba(255,255,255,0.15)">→</span>
+        <span style="color:#e2e8f0">FastAPI</span>
+        <span style="color:rgba(255,255,255,0.15)">→</span>
+        <span style="color:#e2e8f0">SQLAlchemy + PostgreSQL</span>
+        <span style="color:rgba(255,255,255,0.15)">→</span>
+        <span style="color:#e2e8f0">AI Modules</span>
+      </div>
+    </div>
+    <span class="slide-num">04 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 5 — AI MODULLARI ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:340px;height:340px;background:#8b5cf6;top:-40px;right:22%;opacity:0.2"></div>
+    <div class="orb" style="width:180px;height:180px;background:#4f46e5;bottom:12%;left:6%;opacity:0.15"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Sun'iy intellekt</p>
+      <h2>4 ta <span class="hi">AI moduli</span></h2>
+      <p class="sub" style="margin-bottom:24px">Har bir modul mustaqil ishlaydi va tushuntiriladigan natija beradi</p>
+
+      <div class="g2c" style="gap:18px">
+        <div class="g1 pad">
+          <div class="row" style="margin-bottom:12px">
+            <div class="ico" style="background:linear-gradient(135deg,#6366f1,#4338ca)"><svg>
+                <path d="M18 20V10M12 20V4M6 20v-6" />
+              </svg></div>
+            <div>
+              <h3 style="font-size:16px">Samaradorlik skoringi</h3>
+              <p style="font-size:11px;color:#818cf8">scoring.py — 0-100 baho tizimi</p>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#94a3b8;line-height:1.65">6 ta komponent: faol ishlatilish, kutish jarima,
+            vazifa produktivligi, masofa foydalilik, yoqilg'i samaradorlik, bajarilish nisbati.</p>
+        </div>
+        <div class="g1 pad">
+          <div class="row" style="margin-bottom:12px">
+            <div class="ico" style="background:linear-gradient(135deg,#f43f5e,#e11d48)"><svg>
+                <path
+                  d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01" />
+              </svg></div>
+            <div>
+              <h3 style="font-size:16px">Anomaliya detektori</h3>
+              <p style="font-size:11px;color:#fb7185">anomaly.py — Kunlik tahlil</p>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#94a3b8;line-height:1.65">4 turdagi anomaliya: yoqilg'i ortiqcha sarfi,
+            ortiqcha kutish, past samaradorlik, marshrut nomuvofiqlik.</p>
+        </div>
+        <div class="g1 pad">
+          <div class="row" style="margin-bottom:12px">
+            <div class="ico" style="background:linear-gradient(135deg,#f59e0b,#d97706)"><svg>
+                <path
+                  d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94L6.73 20.2a2 2 0 01-2.83 0l-.1-.1a2 2 0 010-2.83l6.73-6.73A6 6 0 016.3 2.53l3.77 3.77z" />
+              </svg></div>
+            <div>
+              <h3 style="font-size:16px">TX xavf bashorati</h3>
+              <p style="font-size:11px;color:#fbbf24">maintenance.py — Proaktiv</p>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#94a3b8;line-height:1.65">4 ta kiruvchi signal: oxirgi xizmatdan kunlar, km
+            oshishi, mashina yoshi, anomaliya soni. Natija: xavf + tavsiya.</p>
+        </div>
+        <div class="g1 pad">
+          <div class="row" style="margin-bottom:12px">
+            <div class="ico" style="background:linear-gradient(135deg,#10b981,#059669)"><svg>
+                <circle cx="12" cy="12" r="10" />
+                <path d="M16 12l-4-4-4 4M12 16V8" />
+              </svg></div>
+            <div>
+              <h3 style="font-size:16px">Tavsiya mexanizmi</h3>
+              <p style="font-size:11px;color:#34d399">recommendation.py — Top-3</p>
+            </div>
+          </div>
+          <p style="font-size:13px;color:#94a3b8;line-height:1.65">Ranking: tur mosligi, masofa, holat, TX xavf jarima,
+            ish yuki, yoqilg'i bonusi. Natija: <span class="hi-e">tushuntiriladigan</span> top-3.</p>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">05 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 6 — MAHSULOT ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:360px;height:360px;background:#4f46e5;bottom:-90px;right:-60px;opacity:0.18"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Mahsulot</p>
+      <h2>Dashboard <span class="hi">ko'rinishi</span></h2>
+      <p class="sub" style="margin-bottom:24px">Professional, davlat tashkilotlari uchun moslashtirilgan interfeys</p>
+
+      <div class="g2c" style="gap:20px">
+        <div>
+          <div class="g2 pad" style="margin-bottom:14px">
+            <p class="lbl" style="margin-bottom:14px">Asosiy sahifalar</p>
+            <div style="display:flex;flex-direction:column;gap:9px;font-size:14px;color:#e2e8f0">
+              <div class="bullet b-i">Boshqaruv paneli — KPI, grafiklar, xarita</div>
+              <div class="bullet b-e">Avtotransport — jadval, filter, qidiruv</div>
+              <div class="bullet b-a">Vazifalar — pipeline + AI tayinlash modal</div>
+              <div class="bullet b-r">Ogohlantirishlar — severity filter + detail modal</div>
+              <div class="bullet b-c">Tahlillar — 6 ta chart, bo'lim taqqoslash</div>
+              <div class="bullet b-v">Texnik xizmat — xavf darajasi + overdue panel</div>
+            </div>
+          </div>
+          <div class="g-accent pad-s">
+            <p style="font-size:13px;font-weight:600;color:#e2e8f0">Responsive dizayn — mobil va planshet moslashtirish
+            </p>
+          </div>
+        </div>
+
+        <div class="g3 pad" style="display:flex;flex-direction:column;justify-content:center">
+          <p class="lbl" style="margin-bottom:14px">Demo ma'lumotlar</p>
+          <div class="mrow"><span style="font-size:14px;color:#94a3b8">Transport vositalari</span><span class="hi"
+              style="font-size:18px;font-weight:800">24 ta</span></div>
+          <div class="mrow"><span style="font-size:14px;color:#94a3b8">Haydovchilar</span><span class="hi-e"
+              style="font-size:18px;font-weight:800">16 ta</span></div>
+          <div class="mrow"><span style="font-size:14px;color:#94a3b8">Vazifalar</span><span class="hi-a"
+              style="font-size:18px;font-weight:800">34 ta</span></div>
+          <div class="mrow"><span style="font-size:14px;color:#94a3b8">Kunlik loglar</span><span class="hi-c"
+              style="font-size:18px;font-weight:800">840+</span></div>
+          <div class="mrow"><span style="font-size:14px;color:#94a3b8">Regionlar</span><span class="hi-r"
+              style="font-size:18px;font-weight:800">O'zbekiston</span></div>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">06 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 7 — ANOMALIYA MISOLI ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:300px;height:300px;background:#f43f5e;top:-60px;left:22%;opacity:0.18"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">AI haqiqiy natija</p>
+      <h2>Anomaliya <span class="hi-r">aniqlash</span> misoli</h2>
+      <p class="sub" style="margin-bottom:24px">Tizim anomaliyani aniqlaydi → tushuntiradi → xulosa beradi</p>
+
+      <div class="g3 pad" style="max-width:780px">
+        <div class="row" style="margin-bottom:18px">
+          <div
+            style="width:12px;height:12px;border-radius:50%;background:#ef4444;box-shadow:0 0 14px rgba(239,68,68,0.5)">
+          </div>
+          <span style="font-size:15px;font-weight:700;color:#fca5a5">YUQORI XAVF — Yoqilg'i anomaliyasi</span>
+        </div>
+
+        <div class="g1" style="padding:14px 18px;margin-bottom:14px">
+          <p style="font-size:12px;color:#64748b;margin-bottom:4px">Transport: <span
+              style="color:#818cf8;font-weight:700">HTN-007</span> · Tur: Traktor</p>
+          <p style="font-size:14px;color:#e2e8f0;line-height:1.6">
+            Yoqilg'i sarfi <span class="hi-r" style="font-weight:700">0.48 L/km</span> — baseline <span
+              style="color:#94a3b8">0.33 L/km</span> dan <span class="hi-r" style="font-weight:700">45%</span> yuqori.
+            Anomaliya bali: <span style="font-weight:800;color:#ef4444">78/100</span>
+          </p>
+        </div>
+
+        <div style="display:flex;gap:14px">
+          <div class="g1" style="flex:1;padding:13px 16px">
+            <p style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">
+              Ishonch darajasi</p>
+            <p style="font-size:22px;font-weight:800;color:#fbbf24">85%</p>
+          </div>
+          <div class="g1" style="flex:1;padding:13px 16px">
+            <p style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">
+              Tavsiya</p>
+            <p style="font-size:13px;color:#e2e8f0">48 soat ichida xizmat ko'rsating</p>
+          </div>
+          <div class="g1" style="flex:1;padding:13px 16px">
+            <p style="font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">TX
+              xavf bali</p>
+            <p style="font-size:22px;font-weight:800;color:#ef4444">82/100</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">07 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 8 — BOZOR ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:340px;height:340px;background:#10b981;top:-70px;right:12%;opacity:0.18"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Bozor imkoniyati</p>
+      <h2>O'zbekiston <span class="hi-e">bozori</span></h2>
+      <p class="sub" style="margin-bottom:28px">GovTech transport nazorati — yangi va katta bozor</p>
+
+      <div class="g3c">
+        <div class="g2 pad" style="text-align:center">
+          <p class="big hi-e">200+</p>
+          <p style="font-size:14px;color:#94a3b8;margin-top:8px">hokimiyat</p>
+          <p style="font-size:12px;color:#64748b;margin-top:3px">potensial mijoz</p>
+        </div>
+        <div class="g2 pad" style="text-align:center">
+          <p class="big hi">50,000+</p>
+          <p style="font-size:14px;color:#94a3b8;margin-top:8px">transport vositasi</p>
+          <p style="font-size:12px;color:#64748b;margin-top:3px">davlat transport parki</p>
+        </div>
+        <div class="g2 pad" style="text-align:center">
+          <p class="big hi-a">$80M+</p>
+          <p style="font-size:14px;color:#94a3b8;margin-top:8px">yillik xarajat</p>
+          <p style="font-size:12px;color:#64748b;margin-top:3px">transport ta'minoti uchun</p>
+        </div>
+      </div>
+
+      <div class="g-accent" style="padding:18px 26px;margin-top:22px">
+        <p style="font-size:14px;font-weight:600;color:#e2e8f0">Boshlang'ich maqsad: <span class="hi">5 ta pilot
+            hokimiyat</span> → 1 yil ichida <span class="hi">50 ta hokimiyat</span></p>
+      </div>
+    </div>
+    <span class="slide-num">08 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 9 — RAQOBAT ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:280px;height:280px;background:#6366f1;top:10%;left:-40px;opacity:0.18"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Raqobat ustunligi</p>
+      <h2>Nima uchun <span class="hi">biz</span>?</h2>
+      <p class="sub" style="margin-bottom:24px">Mavjud yechimlardan farqli taraflarimiz</p>
+
+      <div style="max-width:780px">
+        <div class="g2" style="overflow:hidden;border-radius:16px">
+          <table style="width:100%;border-collapse:collapse;font-size:14px">
+            <thead>
+              <tr style="background:rgba(255,255,255,0.03)">
+                <th
+                  style="padding:13px 20px;text-align:left;color:#94a3b8;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em">
+                  Xususiyat</th>
+                <th
+                  style="padding:13px 20px;text-align:center;color:#818cf8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em">
+                  Bizning tizim</th>
+                <th
+                  style="padding:13px 20px;text-align:center;color:#64748b;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em">
+                  Oddiy GPS tracker</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr style="border-top:1px solid rgba(255,255,255,0.04)">
+                <td style="padding:11px 20px;color:#cbd5e1">AI anomaliya aniqlash</td>
+                <td style="padding:11px 20px;text-align:center;color:#34d399;font-weight:700">Ha</td>
+                <td style="padding:11px 20px;text-align:center;color:#475569">Yo'q</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(255,255,255,0.04)">
+                <td style="padding:11px 20px;color:#cbd5e1">Profilaktik TX bashorati</td>
+                <td style="padding:11px 20px;text-align:center;color:#34d399;font-weight:700">Ha</td>
+                <td style="padding:11px 20px;text-align:center;color:#475569">Yo'q</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(255,255,255,0.04)">
+                <td style="padding:11px 20px;color:#cbd5e1">AI vazifa tayinlash</td>
+                <td style="padding:11px 20px;text-align:center;color:#34d399;font-weight:700">Ha</td>
+                <td style="padding:11px 20px;text-align:center;color:#475569">Yo'q</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(255,255,255,0.04)">
+                <td style="padding:11px 20px;color:#cbd5e1">Samaradorlik skoringi</td>
+                <td style="padding:11px 20px;text-align:center;color:#34d399;font-weight:700">Ha</td>
+                <td style="padding:11px 20px;text-align:center;color:#475569">Yo'q</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(255,255,255,0.04)">
+                <td style="padding:11px 20px;color:#cbd5e1">GovTech moslashuv</td>
+                <td style="padding:11px 20px;text-align:center;color:#34d399;font-weight:700">Ha</td>
+                <td style="padding:11px 20px;text-align:center;color:#475569">Yo'q</td>
+              </tr>
+              <tr style="border-top:1px solid rgba(255,255,255,0.04)">
+                <td style="padding:11px 20px;color:#cbd5e1">Narx (oyiga)</td>
+                <td style="padding:11px 20px;text-align:center;font-weight:700;color:#34d399">Arzon SaaS</td>
+                <td style="padding:11px 20px;text-align:center;color:#94a3b8">Qurilma + obuna</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">09 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 10 — BIZNES MODEL ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:300px;height:300px;background:#f59e0b;bottom:-70px;right:15%;opacity:0.17"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Biznes model</p>
+      <h2>Daromad <span class="hi-a">modeli</span></h2>
+      <p class="sub" style="margin-bottom:24px">SaaS + konsalting — hokimiyatlar uchun moslashtirilgan narxlash</p>
+
+      <div class="g3c">
+        <div class="g1 pad" style="border-top:3px solid #64748b">
+          <p
+            style="font-size:10px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">
+            Boshlang'ich</p>
+          <p style="font-size:30px;font-weight:900;color:#e2e8f0">3M <span
+              style="font-size:13px;color:#64748b">so'm/oy</span></p>
+          <p style="font-size:13px;color:#94a3b8;margin-top:10px;line-height:1.6">10 ta transportgacha<br>Dashboard +
+            monitoring<br>Email ogohlantirish</p>
+        </div>
+        <div class="g2 pad" style="border-top:3px solid #818cf8">
+          <p
+            style="font-size:10px;font-weight:700;color:#818cf8;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">
+            Professional</p>
+          <p style="font-size:30px;font-weight:900;color:#e2e8f0">8M <span
+              style="font-size:13px;color:#64748b">so'm/oy</span></p>
+          <p style="font-size:13px;color:#94a3b8;margin-top:10px;line-height:1.6">50 ta transportgacha<br>AI tahlillar
+            to'liq<br>Anomaliya + TX bashorati</p>
+        </div>
+        <div class="g2 pad" style="border-top:3px solid #34d399">
+          <p
+            style="font-size:10px;font-weight:700;color:#34d399;text-transform:uppercase;letter-spacing:0.12em;margin-bottom:6px">
+            Enterprise</p>
+          <p style="font-size:30px;font-weight:900;color:#e2e8f0">15M+ <span
+              style="font-size:13px;color:#64748b">so'm/oy</span></p>
+          <p style="font-size:13px;color:#94a3b8;margin-top:10px;line-height:1.6">Cheksiz transport<br>Maxsus
+            integratsiya<br>Dedicated qo'llab-quvvatlash</p>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">10 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 11 — ROADMAP ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:280px;height:280px;background:#06b6d4;top:18%;right:-40px;opacity:0.18"></div>
+    <div class="topbar">
+      <div class="topbar-mark"><svg>
+          <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+        </svg></div>TRANSPORT NAZORATI AI
+    </div>
+
+    <div class="content">
+      <p class="lbl">Rivojlanish</p>
+      <h2>Yo'l <span class="hi-c">xaritasi</span></h2>
+      <p class="sub" style="margin-bottom:28px">6 oyllik sprint rejasi</p>
+
+      <div class="g4c">
+        <div class="g1 pad-s" style="border-left:3px solid #4f46e5">
+          <p style="font-size:10px;font-weight:700;color:#818cf8;margin-bottom:5px">Q2 2026</p>
+          <h3 style="font-size:15px;margin-bottom:8px">MVP + Pilot</h3>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.7">
+            <div class="bullet b-i">3 hokimiyatda pilot</div>
+            <div class="bullet b-i">GPS qurilma integratsiya</div>
+            <div class="bullet b-i">Mobil ilova (haydovchi)</div>
+          </div>
+        </div>
+        <div class="g1 pad-s" style="border-left:3px solid #10b981">
+          <p style="font-size:10px;font-weight:700;color:#34d399;margin-bottom:5px">Q3 2026</p>
+          <h3 style="font-size:15px;margin-bottom:8px">Kengaytirish</h3>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.7">
+            <div class="bullet b-e">15+ hokimiyat</div>
+            <div class="bullet b-e">ML optimallashtirish</div>
+            <div class="bullet b-e">Telegram bot xabar</div>
+          </div>
+        </div>
+        <div class="g1 pad-s" style="border-left:3px solid #f59e0b">
+          <p style="font-size:10px;font-weight:700;color:#fbbf24;margin-bottom:5px">Q4 2026</p>
+          <h3 style="font-size:15px;margin-bottom:8px">Enterprise</h3>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.7">
+            <div class="bullet b-a">50+ hokimiyat</div>
+            <div class="bullet b-a">Viloyat hokimi paneli</div>
+            <div class="bullet b-a">Davlat API integratsiya</div>
+          </div>
+        </div>
+        <div class="g1 pad-s" style="border-left:3px solid #8b5cf6">
+          <p style="font-size:10px;font-weight:700;color:#a78bfa;margin-bottom:5px">2027</p>
+          <h3 style="font-size:15px;margin-bottom:8px">Milliy qamrov</h3>
+          <div style="font-size:12px;color:#94a3b8;line-height:1.7">
+            <div class="bullet b-v">200 hokimiyat</div>
+            <div class="bullet b-v">Prediktiv ML</div>
+            <div class="bullet b-v">Markaziy panel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="slide-num">11 / 12</span>
+  </div>
+
+  <!-- ═══════════════ SLIDE 12 — CTA ═══════════════ -->
+  <div class="slide">
+    <div class="orb" style="width:400px;height:400px;background:#4f46e5;top:-80px;right:-60px;opacity:0.12"></div>
+    <div class="orb" style="width:300px;height:300px;background:#06b6d4;bottom:-80px;left:-40px;opacity:0.12"></div>
+    <div class="orb" style="width:250px;height:250px;background:#8b5cf6;top:42%;left:42%;opacity:0.1"></div>
+
+    <div class="content" style="text-align:center;max-width:680px;margin:0 auto">
+      <div style="display:flex;justify-content:center;margin-bottom:32px">
+        <div
+          style="width:68px;height:68px;border-radius:18px;background:linear-gradient(135deg,#6366f1,#4338ca);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(79,70,229,0.4)">
+          <svg width="32" height="32" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M12 2l1 5h5l-4 3 1.5 5L12 12.5 8.5 15 10 10 6 7h5z" />
+          </svg>
+        </div>
+      </div>
+
+      <h1 style="font-size:44px">Hokimiyat transportini<br><span class="hi">aqlli boshqaring</span></h1>
+      <p class="sub" style="margin-bottom:36px">AI yordamida xarajatlarni kamaytiring, samaradorlikni oshiring,<br>va
+        transport parkini to'liq nazorat ostiga oling.</p>
+
+
+    </div>
+    <span class="slide-num">12 / 12</span>
+  </div>
+
+</body>
+
+</html>

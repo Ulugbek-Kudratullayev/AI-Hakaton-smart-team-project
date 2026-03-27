@@ -82,8 +82,8 @@ def seed_demo_data(db: Session, reset: bool = False) -> None:
                     k=1,
                 )[0],
                 experience_years=rng.randint(2, 18),
-                current_lat=location["lat"] + rng.uniform(-0.03, 0.03),
-                current_lng=location["lng"] + rng.uniform(-0.03, 0.03),
+                current_lat=location["lat"] + rng.uniform(-0.008, 0.008),
+                current_lng=location["lng"] + rng.uniform(-0.012, 0.012),
             )
         )
     db.add_all(drivers)
@@ -115,8 +115,8 @@ def seed_demo_data(db: Session, reset: bool = False) -> None:
                 fuel_capacity=fuel_capacity,
                 status=status,
                 assigned_driver_id=assigned_driver.id if assigned_driver else None,
-                current_lat=location["lat"] + rng.uniform(-0.08, 0.08),
-                current_lng=location["lng"] + rng.uniform(-0.08, 0.08),
+                current_lat=location["lat"] + rng.uniform(-0.012, 0.012),
+                current_lng=location["lng"] + rng.uniform(-0.018, 0.018),
                 odometer=base_odometer,
                 last_service_date=last_service_date,
                 next_service_due_km=next_service_due_km,

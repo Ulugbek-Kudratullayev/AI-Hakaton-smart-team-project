@@ -27,13 +27,9 @@ const vehicleModels: Record<string, string[]> = {
   "sug'orish_mashinasi": ['KamAZ Suv', 'ZIL Sugorish', 'MAZ Suv tashish', 'GAZ Suv', 'Howo Suv'],
 };
 
-const regions = ['Toshkent viloyati', 'Farg\'ona viloyati', 'Samarqand viloyati', 'Buxoro viloyati', 'Andijon viloyati'];
+const regions = ['Farg\'ona'];
 const districts: Record<string, string[]> = {
-  'Toshkent viloyati': ['Chirchiq tumani', 'Olmaliq tumani', 'Zangiota tumani', 'Qibray tumani'],
-  'Farg\'ona viloyati': ['Farg\'ona tumani', 'Marg\'ilon tumani', 'Quva tumani', 'Rishton tumani'],
-  'Samarqand viloyati': ['Samarqand tumani', 'Urgut tumani', 'Kattaqo\'rg\'on tumani', 'Jomboy tumani'],
-  'Buxoro viloyati': ['Buxoro tumani', 'Kogon tumani', 'G\'ijduvon tumani', 'Vobkent tumani'],
-  'Andijon viloyati': ['Andijon tumani', 'Asaka tumani', 'Xo\'jaobod tumani', 'Shahrixon tumani'],
+  'Farg\'ona': ['Markaz', 'Shimoliy tuman', 'Janubiy tuman', 'Sharqiy tuman', 'G\'arbiy tuman', 'Shimoliy-sharq', 'Janubiy-g\'arb'],
 };
 
 const vehicleTypes: Array<{ type: Vehicle['type']; prefix: string }> = [
@@ -47,9 +43,9 @@ const vehicleTypes: Array<{ type: Vehicle['type']; prefix: string }> = [
 
 const statuses: Vehicle['status'][] = ['faol', 'faol', 'faol', 'kutish', 'ta\'mirda', 'yo\'lda', 'yo\'lda'];
 
-// Center around Tashkent region
-const baseLat = 41.3;
-const baseLng = 69.25;
+// Center around Farg'ona shahri
+const baseLat = 40.384;
+const baseLng = 71.789;
 
 // Deterministic pseudo-random for consistent SSR/client rendering
 function seededRandom(seed: number): number {
@@ -71,8 +67,8 @@ export const vehicles: Vehicle[] = Array.from({ length: 25 }, (_, i) => {
     status: statuses[i % statuses.length],
     assigned_driver: drivers[i % drivers.length],
     current_location: {
-      lat: baseLat + (r(1) - 0.5) * 0.3,
-      lng: baseLng + (r(2) - 0.5) * 0.4,
+      lat: baseLat + (r(1) - 0.5) * 0.04,
+      lng: baseLng + (r(2) - 0.5) * 0.06,
     },
     odometer: Math.floor(15000 + r(3) * 120000),
     efficiency_score: Math.floor(55 + r(4) * 45),
@@ -89,10 +85,10 @@ export const vehicles: Vehicle[] = Array.from({ length: 25 }, (_, i) => {
 export const tasks: Task[] = [
   {
     id: 't-001', title: 'Bug\'doy dalasini haydash', type: 'Qishloq xo\'jalik', priority: 'yuqori',
-    region: 'Toshkent viloyati', district: 'Chirchiq tumani', scheduled_start: '2026-03-27T08:00:00',
+    region: 'Farg\'ona', district: 'Shimoliy tuman', scheduled_start: '2026-03-27T08:00:00',
     scheduled_end: '2026-03-27T17:00:00', status: 'rejalashtirilgan', assigned_vehicle: 'v-001',
     assigned_vehicle_code: 'TR-001', description: '50 gektar bug\'doy dalasini haydash kerak',
-    created_at: '2026-03-25T10:00:00',
+    created_at: '2026-03-25T10:00:00', lat: 40.396, lng: 71.810,
     recommended_vehicles: [
       { vehicle_id: 'v-001', vehicle_code: 'TR-001', score: 95, reason: 'Eng yaqin joylashuv, yuqori samaradorlik' },
       { vehicle_id: 'v-007', vehicle_code: 'TR-007', score: 88, reason: 'Yaxshi texnik holat, tajribali haydovchi' },
@@ -101,10 +97,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-002', title: 'Ko\'cha tozalash xizmati', type: 'Kommunal', priority: 'o\'rta',
-    region: 'Toshkent viloyati', district: 'Zangiota tumani', scheduled_start: '2026-03-27T06:00:00',
+    region: 'Farg\'ona', district: 'Markaz', scheduled_start: '2026-03-27T06:00:00',
     scheduled_end: '2026-03-27T12:00:00', status: 'jarayonda', assigned_vehicle: 'v-002',
     assigned_vehicle_code: 'YM-002', description: 'Asosiy ko\'chalarni tozalash va chiqindilarni olib ketish',
-    created_at: '2026-03-25T09:00:00',
+    created_at: '2026-03-25T09:00:00', lat: 40.385, lng: 71.784,
     recommended_vehicles: [
       { vehicle_id: 'v-002', vehicle_code: 'YM-002', score: 92, reason: 'Tegishli tur, yaqin hudud' },
       { vehicle_id: 'v-008', vehicle_code: 'YM-008', score: 85, reason: 'Zaxira variant, yaxshi holat' },
@@ -113,10 +109,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-003', title: 'Yo\'l ta\'mirlash ishlari', type: 'Qurilish', priority: 'yuqori',
-    region: 'Samarqand viloyati', district: 'Urgut tumani', scheduled_start: '2026-03-28T07:00:00',
+    region: 'Farg\'ona', district: 'Janubiy tuman', scheduled_start: '2026-03-28T07:00:00',
     scheduled_end: '2026-03-28T18:00:00', status: 'rejalashtirilgan', assigned_vehicle: null,
-    assigned_vehicle_code: null, description: 'Urgut tumanidagi 5 km yo\'l qoplamasi ta\'mirlash',
-    created_at: '2026-03-25T14:00:00',
+    assigned_vehicle_code: null, description: 'Janubiy tumandagi 5 km yo\'l qoplamasi ta\'mirlash',
+    created_at: '2026-03-25T14:00:00', lat: 40.368, lng: 71.778,
     recommended_vehicles: [
       { vehicle_id: 'v-005', vehicle_code: 'EK-005', score: 90, reason: 'Ekskovator turi mos, yaqin' },
       { vehicle_id: 'v-011', vehicle_code: 'EK-011', score: 84, reason: 'Yaxshi ishlash ko\'rsatkichi' },
@@ -125,10 +121,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-004', title: 'Sugorish tizimini tekshirish', type: 'Qishloq xo\'jalik', priority: 'o\'rta',
-    region: 'Farg\'ona viloyati', district: 'Quva tumani', scheduled_start: '2026-03-27T09:00:00',
+    region: 'Farg\'ona', district: 'Sharqiy tuman', scheduled_start: '2026-03-27T09:00:00',
     scheduled_end: '2026-03-27T15:00:00', status: 'bajarildi', assigned_vehicle: 'v-006',
     assigned_vehicle_code: 'SM-006', description: 'Sugorish kanallarini tekshirish va ta\'mirlash',
-    created_at: '2026-03-24T11:00:00',
+    created_at: '2026-03-24T11:00:00', lat: 40.382, lng: 71.812,
     recommended_vehicles: [
       { vehicle_id: 'v-006', vehicle_code: 'SM-006', score: 94, reason: 'Sug\'orish mashinasi, eng mos' },
       { vehicle_id: 'v-012', vehicle_code: 'SM-012', score: 87, reason: 'Zaxira variant' },
@@ -137,10 +133,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-005', title: 'Maktab marshuti', type: 'Transport', priority: 'yuqori',
-    region: 'Toshkent viloyati', district: 'Qibray tumani', scheduled_start: '2026-03-27T07:00:00',
+    region: 'Farg\'ona', district: 'Markaz', scheduled_start: '2026-03-27T07:00:00',
     scheduled_end: '2026-03-27T08:30:00', status: 'jarayonda', assigned_vehicle: 'v-004',
     assigned_vehicle_code: 'AV-004', description: 'O\'quvchilarni maktabga yetkazish marshruti',
-    created_at: '2026-03-26T06:00:00',
+    created_at: '2026-03-26T06:00:00', lat: 40.388, lng: 71.792,
     recommended_vehicles: [
       { vehicle_id: 'v-004', vehicle_code: 'AV-004', score: 96, reason: 'Avtobus turi, eng mos marshrut' },
       { vehicle_id: 'v-010', vehicle_code: 'AV-010', score: 89, reason: 'Zaxira avtobus, yaxshi holat' },
@@ -149,10 +145,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-006', title: 'Paxta terimiga tayyorgarlik', type: 'Qishloq xo\'jalik', priority: 'past',
-    region: 'Buxoro viloyati', district: 'G\'ijduvon tumani', scheduled_start: '2026-03-29T08:00:00',
+    region: 'Farg\'ona', district: 'G\'arbiy tuman', scheduled_start: '2026-03-29T08:00:00',
     scheduled_end: '2026-03-29T16:00:00', status: 'rejalashtirilgan', assigned_vehicle: null,
     assigned_vehicle_code: null, description: 'Dalalarni paxta terimi uchun tayyorlash',
-    created_at: '2026-03-25T16:00:00',
+    created_at: '2026-03-25T16:00:00', lat: 40.384, lng: 71.760,
     recommended_vehicles: [
       { vehicle_id: 'v-019', vehicle_code: 'TR-019', score: 91, reason: 'Eng yaqin traktor, bo\'sh' },
       { vehicle_id: 'v-025', vehicle_code: 'TR-025', score: 85, reason: 'Yaxshi samaradorlik' },
@@ -161,10 +157,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-007', title: 'Kommunal avariya chiqish', type: 'Kommunal', priority: 'yuqori',
-    region: 'Andijon viloyati', district: 'Asaka tumani', scheduled_start: '2026-03-26T14:00:00',
+    region: 'Farg\'ona', district: 'Shimoliy tuman', scheduled_start: '2026-03-26T14:00:00',
     scheduled_end: '2026-03-26T18:00:00', status: 'jarayonda', assigned_vehicle: 'v-003',
     assigned_vehicle_code: 'XA-003', description: 'Suv quvuri portlashi, tezkor ta\'mirlash',
-    created_at: '2026-03-26T13:30:00',
+    created_at: '2026-03-26T13:30:00', lat: 40.394, lng: 71.772,
     recommended_vehicles: [
       { vehicle_id: 'v-003', vehicle_code: 'XA-003', score: 93, reason: 'Eng yaqin xizmat avtomobili' },
       { vehicle_id: 'v-009', vehicle_code: 'XA-009', score: 86, reason: 'Zaxira, yaxshi holat' },
@@ -173,10 +169,10 @@ export const tasks: Task[] = [
   },
   {
     id: 't-008', title: 'Ekologik monitoring', type: 'Ekologiya', priority: 'o\'rta',
-    region: 'Samarqand viloyati', district: 'Jomboy tumani', scheduled_start: '2026-03-28T09:00:00',
+    region: 'Farg\'ona', district: 'Janubiy-g\'arb', scheduled_start: '2026-03-28T09:00:00',
     scheduled_end: '2026-03-28T14:00:00', status: 'rejalashtirilgan', assigned_vehicle: null,
     assigned_vehicle_code: null, description: 'Hududdagi ekologik holatni tekshirish va hisobot',
-    created_at: '2026-03-26T10:00:00',
+    created_at: '2026-03-26T10:00:00', lat: 40.370, lng: 71.762,
     recommended_vehicles: [
       { vehicle_id: 'v-003', vehicle_code: 'XA-003', score: 88, reason: 'Xizmat avtomobili, qulay' },
       { vehicle_id: 'v-009', vehicle_code: 'XA-009', score: 82, reason: 'Yaxshi yoqilg\'i samaradorligi' },
